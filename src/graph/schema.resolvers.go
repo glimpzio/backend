@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -27,7 +28,7 @@ func (r *mutationResolver) CreateLink(ctx context.Context, input *model.NewLink)
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	return nil, errors.New("test")
 }
 
 // Mutation returns MutationResolver implementation.
