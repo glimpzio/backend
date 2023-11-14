@@ -34,6 +34,10 @@ func (r *mutationResolver) UpdateProfile(ctx context.Context, userID string, inp
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
 	user := r.ProfileService.GetUser(id)
 
+	if user == nil {
+		return nil, nil
+	}
+
 	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
 }
 

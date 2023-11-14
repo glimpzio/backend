@@ -30,5 +30,9 @@ func (p *ProfileService) NewUser(user *NewUser) (*User, error) {
 func (p *ProfileService) GetUser(userId string) *User {
 	rawUser := p.model.GetUser(userId)
 
+	if rawUser == nil {
+		return nil
+	}
+
 	return &User{Id: rawUser.Id, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}
 }
