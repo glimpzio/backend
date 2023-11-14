@@ -9,17 +9,20 @@ type User struct {
 	Bio   string `json:"bio"`
 }
 
-type UserContact struct {
-	UserId   string  `json:"userId"`
-	Email    *string `json:"email"`
-	Phone    *string `json:"phone"`
-	Website  *string `json:"website"`
-	LinkedIn *string `json:"linkedin"`
+type UserProfile struct {
+	Id        string  `json:"id"`
+	UserId    string  `json:"userId"`
+	Email     *string `json:"email"`
+	Phone     *string `json:"phone"`
+	Website   *string `json:"website"`
+	LinkedIn  *string `json:"linkedin"`
+	Instagram *string `json:"instagram"`
+	Facebook  *string `json:"facebook"`
 }
 
 type Link struct {
-	Id     string    `json:"name"`
-	UserId string    `json:"userId"`
-	Url    string    `json:"url"`
-	Expiry time.Time `json:"expiry"`
+	Id            string    `json:"name"`
+	UserProfileId string    `json:"userProfileId"`
+	Url           string    `json:"url"`
+	Expiry        time.Time `json:"expiry"`
 }
