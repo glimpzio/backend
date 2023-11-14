@@ -13,12 +13,10 @@ type NewLink struct {
 }
 
 type NewProfile struct {
-	Email     *string `json:"email,omitempty"`
-	Phone     *string `json:"phone,omitempty"`
-	Website   *string `json:"website,omitempty"`
-	Linkedin  *string `json:"linkedin,omitempty"`
-	Instagram *string `json:"instagram,omitempty"`
-	Facebook  *string `json:"facebook,omitempty"`
+	Email    *string `json:"email,omitempty"`
+	Phone    *string `json:"phone,omitempty"`
+	Website  *string `json:"website,omitempty"`
+	Linkedin *string `json:"linkedin,omitempty"`
 }
 
 type NewUser struct {
@@ -29,12 +27,10 @@ type NewUser struct {
 }
 
 type Profile struct {
-	Email     *string `json:"email,omitempty"`
-	Phone     *string `json:"phone,omitempty"`
-	Website   *string `json:"website,omitempty"`
-	Linkedin  *string `json:"linkedin,omitempty"`
-	Instagram *string `json:"instagram,omitempty"`
-	Facebook  *string `json:"facebook,omitempty"`
+	Email    *string `json:"email,omitempty"`
+	Phone    *string `json:"phone,omitempty"`
+	Website  *string `json:"website,omitempty"`
+	Linkedin *string `json:"linkedin,omitempty"`
 }
 
 type User struct {

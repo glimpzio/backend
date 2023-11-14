@@ -60,12 +60,10 @@ type ComplexityRoot struct {
 	}
 
 	Profile struct {
-		Email     func(childComplexity int) int
-		Facebook  func(childComplexity int) int
-		Instagram func(childComplexity int) int
-		Linkedin  func(childComplexity int) int
-		Phone     func(childComplexity int) int
-		Website   func(childComplexity int) int
+		Email    func(childComplexity int) int
+		Linkedin func(childComplexity int) int
+		Phone    func(childComplexity int) int
+		Website  func(childComplexity int) int
 	}
 
 	Query struct {
@@ -172,20 +170,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Profile.Email(childComplexity), true
-
-	case "Profile.facebook":
-		if e.complexity.Profile.Facebook == nil {
-			break
-		}
-
-		return e.complexity.Profile.Facebook(childComplexity), true
-
-	case "Profile.instagram":
-		if e.complexity.Profile.Instagram == nil {
-			break
-		}
-
-		return e.complexity.Profile.Instagram(childComplexity), true
 
 	case "Profile.linkedin":
 		if e.complexity.Profile.Linkedin == nil {
@@ -804,10 +788,6 @@ func (ec *executionContext) fieldContext_Mutation_updateProfile(ctx context.Cont
 				return ec.fieldContext_Profile_website(ctx, field)
 			case "linkedin":
 				return ec.fieldContext_Profile_linkedin(ctx, field)
-			case "instagram":
-				return ec.fieldContext_Profile_instagram(ctx, field)
-			case "facebook":
-				return ec.fieldContext_Profile_facebook(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
@@ -978,88 +958,6 @@ func (ec *executionContext) _Profile_linkedin(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext_Profile_linkedin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Profile",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Profile_instagram(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Profile_instagram(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Instagram, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Profile_instagram(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Profile",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Profile_facebook(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Profile_facebook(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Facebook, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Profile_facebook(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Profile",
 		Field:      field,
@@ -1488,10 +1386,6 @@ func (ec *executionContext) fieldContext_User_profile(ctx context.Context, field
 				return ec.fieldContext_Profile_website(ctx, field)
 			case "linkedin":
 				return ec.fieldContext_Profile_linkedin(ctx, field)
-			case "instagram":
-				return ec.fieldContext_Profile_instagram(ctx, field)
-			case "facebook":
-				return ec.fieldContext_Profile_facebook(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
@@ -3308,7 +3202,7 @@ func (ec *executionContext) unmarshalInputNewProfile(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"email", "phone", "website", "linkedin", "instagram", "facebook"}
+	fieldsInOrder := [...]string{"email", "phone", "website", "linkedin"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3351,24 +3245,6 @@ func (ec *executionContext) unmarshalInputNewProfile(ctx context.Context, obj in
 				return it, err
 			}
 			it.Linkedin = data
-		case "instagram":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("instagram"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Instagram = data
-		case "facebook":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("facebook"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Facebook = data
 		}
 	}
 
@@ -3570,10 +3446,6 @@ func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Profile_website(ctx, field, obj)
 		case "linkedin":
 			out.Values[i] = ec._Profile_linkedin(ctx, field, obj)
-		case "instagram":
-			out.Values[i] = ec._Profile_instagram(ctx, field, obj)
-		case "facebook":
-			out.Values[i] = ec._Profile_facebook(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
