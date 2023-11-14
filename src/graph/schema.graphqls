@@ -28,7 +28,6 @@ type Query {
 }
 
 input NewUser {
-    id: ID!
     name: String!
     email: String!
     bio: String!
@@ -38,7 +37,7 @@ input NewLink {
     userId: ID!
 }
 
-input NewProfile {
+input UpdatedProfile {
     email: String
     phone: String
     website: String
@@ -47,6 +46,6 @@ input NewProfile {
 
 type Mutation {
   createUser(input: NewUser!): User!
-  createLink(input: NewLink): Link!
-  updateProfile(input: NewProfile): Profile!
+  createLink(input: NewLink!): Link!
+  updateProfile(userId: ID!, input: UpdatedProfile!): Profile!
 }

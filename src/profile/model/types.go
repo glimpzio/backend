@@ -12,10 +12,10 @@ type User struct {
 type UserProfile struct {
 	Id       string  `json:"id"`
 	UserId   string  `json:"userId"`
-	Email    *string `json:"email"`
-	Phone    *string `json:"phone"`
-	Website  *string `json:"website"`
-	LinkedIn *string `json:"linkedin"`
+	Email    *string `json:"email,omitempty"`
+	Phone    *string `json:"phone,omitempty"`
+	Website  *string `json:"website,omitempty"`
+	LinkedIn *string `json:"linkedin,omitempty"`
 }
 
 type Link struct {

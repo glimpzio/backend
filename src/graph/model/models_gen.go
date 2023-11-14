@@ -12,21 +12,20 @@ type NewLink struct {
 	UserID string `json:"userId"`
 }
 
-type NewProfile struct {
-	Email    *string `json:"email,omitempty"`
-	Phone    *string `json:"phone,omitempty"`
-	Website  *string `json:"website,omitempty"`
-	Linkedin *string `json:"linkedin,omitempty"`
-}
-
 type NewUser struct {
-	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
 	Bio   string `json:"bio"`
 }
 
 type Profile struct {
+	Email    *string `json:"email,omitempty"`
+	Phone    *string `json:"phone,omitempty"`
+	Website  *string `json:"website,omitempty"`
+	Linkedin *string `json:"linkedin,omitempty"`
+}
+
+type UpdatedProfile struct {
 	Email    *string `json:"email,omitempty"`
 	Phone    *string `json:"phone,omitempty"`
 	Website  *string `json:"website,omitempty"`

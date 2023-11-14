@@ -54,9 +54,9 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateLink    func(childComplexity int, input *model.NewLink) int
+		CreateLink    func(childComplexity int, input model.NewLink) int
 		CreateUser    func(childComplexity int, input model.NewUser) int
-		UpdateProfile func(childComplexity int, input *model.NewProfile) int
+		UpdateProfile func(childComplexity int, userID string, input model.UpdatedProfile) int
 	}
 
 	Profile struct {
@@ -81,8 +81,8 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input model.NewUser) (*model.User, error)
-	CreateLink(ctx context.Context, input *model.NewLink) (*model.Link, error)
-	UpdateProfile(ctx context.Context, input *model.NewProfile) (*model.Profile, error)
+	CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error)
+	UpdateProfile(ctx context.Context, userID string, input model.UpdatedProfile) (*model.Profile, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, id string) (*model.User, error)
@@ -138,7 +138,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateLink(childComplexity, args["input"].(*model.NewLink)), true
+		return e.complexity.Mutation.CreateLink(childComplexity, args["input"].(model.NewLink)), true
 
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -162,7 +162,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateProfile(childComplexity, args["input"].(*model.NewProfile)), true
+		return e.complexity.Mutation.UpdateProfile(childComplexity, args["userId"].(string), args["input"].(model.UpdatedProfile)), true
 
 	case "Profile.email":
 		if e.complexity.Profile.Email == nil {
@@ -248,8 +248,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputNewLink,
-		ec.unmarshalInputNewProfile,
 		ec.unmarshalInputNewUser,
+		ec.unmarshalInputUpdatedProfile,
 	)
 	first := true
 
@@ -369,10 +369,10 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_createLink_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.NewLink
+	var arg0 model.NewLink
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalONewLink2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐNewLink(ctx, tmp)
+		arg0, err = ec.unmarshalNNewLink2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐNewLink(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -399,15 +399,24 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateProfile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.NewProfile
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalONewProfile2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐNewProfile(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
+	args["userId"] = arg0
+	var arg1 model.UpdatedProfile
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg1, err = ec.unmarshalNUpdatedProfile2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐUpdatedProfile(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg1
 	return args, nil
 }
 
@@ -692,7 +701,7 @@ func (ec *executionContext) _Mutation_createLink(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateLink(rctx, fc.Args["input"].(*model.NewLink))
+		return ec.resolvers.Mutation().CreateLink(rctx, fc.Args["input"].(model.NewLink))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -755,7 +764,7 @@ func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateProfile(rctx, fc.Args["input"].(*model.NewProfile))
+		return ec.resolvers.Mutation().UpdateProfile(rctx, fc.Args["userId"].(string), fc.Args["input"].(model.UpdatedProfile))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3195,8 +3204,55 @@ func (ec *executionContext) unmarshalInputNewLink(ctx context.Context, obj inter
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputNewProfile(ctx context.Context, obj interface{}) (model.NewProfile, error) {
-	var it model.NewProfile
+func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj interface{}) (model.NewUser, error) {
+	var it model.NewUser
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "email", "bio"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "bio":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bio"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Bio = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdatedProfile(ctx context.Context, obj interface{}) (model.UpdatedProfile, error) {
+	var it model.UpdatedProfile
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -3245,62 +3301,6 @@ func (ec *executionContext) unmarshalInputNewProfile(ctx context.Context, obj in
 				return it, err
 			}
 			it.Linkedin = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj interface{}) (model.NewUser, error) {
-	var it model.NewUser
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"id", "name", "email", "bio"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		case "email":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Email = data
-		case "bio":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bio"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Bio = data
 		}
 	}
 
@@ -3967,6 +3967,11 @@ func (ec *executionContext) marshalNLink2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋ
 	return ec._Link(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNNewLink2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐNewLink(ctx context.Context, v interface{}) (model.NewLink, error) {
+	res, err := ec.unmarshalInputNewLink(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐNewUser(ctx context.Context, v interface{}) (model.NewUser, error) {
 	res, err := ec.unmarshalInputNewUser(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3999,6 +4004,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUpdatedProfile2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐUpdatedProfile(ctx context.Context, v interface{}) (model.UpdatedProfile, error) {
+	res, err := ec.unmarshalInputUpdatedProfile(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
@@ -4292,22 +4302,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
-}
-
-func (ec *executionContext) unmarshalONewLink2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐNewLink(ctx context.Context, v interface{}) (*model.NewLink, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputNewLink(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalONewProfile2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐNewProfile(ctx context.Context, v interface{}) (*model.NewProfile, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputNewProfile(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

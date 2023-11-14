@@ -22,12 +22,12 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 }
 
 // CreateLink is the resolver for the createLink field.
-func (r *mutationResolver) CreateLink(ctx context.Context, input *model.NewLink) (*model.Link, error) {
+func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
 	panic(fmt.Errorf("not implemented: CreateLink - createLink"))
 }
 
 // UpdateProfile is the resolver for the updateProfile field.
-func (r *mutationResolver) UpdateProfile(ctx context.Context, input *model.NewProfile) (*model.Profile, error) {
+func (r *mutationResolver) UpdateProfile(ctx context.Context, userID string, input model.UpdatedProfile) (*model.Profile, error) {
 	panic(fmt.Errorf("not implemented: UpdateProfile - updateProfile"))
 }
 
