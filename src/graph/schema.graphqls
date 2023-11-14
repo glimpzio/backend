@@ -15,8 +15,6 @@ type Profile {
     phone: String
     website: String
     linkedin: String
-    instagram: String
-    facebook: String
 }
 
 type Link {
@@ -45,8 +43,6 @@ input NewProfile {
     phone: String
     website: String
     linkedin: String
-    instagram: String
-    facebook: String
 }
 
 type Mutation {

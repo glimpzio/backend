@@ -15,9 +15,7 @@ CREATE TABLE user_profiles (
     email TEXT,
     phone TEXT,
     website TEXT,
-    linkedin TEXT,
-    instagram TEXT,
-    facebook TEXT
+    linkedin TEXT
 );
 
 CREATE TABLE links (
