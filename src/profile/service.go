@@ -17,18 +17,18 @@ func NewProfileService(db *sql.DB) *ProfileService {
 
 // Create a new user
 func (p *ProfileService) NewUser(user *NewUser) (*User, error) {
-	rawUser, rawProfile, err := p.model.CreateUser(user.Name, user.Email, user.Bio)
+	rawUser, err := p.model.CreateUser(user.Name, user.PersonalEmail, user.Bio)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &User{Id: rawUser.Id, Name: rawUser.Name, Email: rawUser.Email, Bio: rawUser.Bio, Profile: &Profile{Email: rawProfile.Email, Phone: rawProfile.Phone, Website: rawProfile.Website, Linkedin: rawProfile.LinkedIn}}, nil
+	return &User{Id: rawUser.Id, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
 }
 
 // Get a user
 func (p *ProfileService) GetUser(userId string) *User {
-	rawUser, rawProfile := p.model.GetUser(userId)
+	rawUser := p.model.GetUser(userId)
 
-	return &User{Id: rawUser.Id, Name: rawUser.Name, Email: rawUser.Email, Bio: rawUser.Bio, Profile: &Profile{Email: rawProfile.Email, Phone: rawProfile.Phone, Website: rawProfile.Website, Linkedin: rawProfile.LinkedIn}}
+	return &User{Id: rawUser.Id, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}
 }
