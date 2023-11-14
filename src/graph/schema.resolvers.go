@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -33,7 +32,9 @@ func (r *mutationResolver) UpdateProfile(ctx context.Context, userID string, inp
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	return nil, errors.New("test")
+	user := r.ProfileService.GetUser(id)
+
+	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
 }
 
 // Mutation returns MutationResolver implementation.

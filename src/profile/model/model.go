@@ -12,7 +12,7 @@ type Model struct {
 func (m *Model) CreateUser(name string, email string, bio string) (*User, error) {
 	user := &User{}
 
-	err := m.Db.QueryRow("INSERT INTO users (name, email, bio) VALUES ($1, $2, $3) RETURNING id, name, email, bio", name, email, bio).Scan(&user.Id, &user.Name, &user.Email, &user.Bio)
+	err := m.Db.QueryRow("INSERT INTO users (name, personalEmail, bio) VALUES ($1, $2, $3) RETURNING id, name, personalEmail, bio", name, email, bio).Scan(&user.Id, &user.Name, &user.PersonalEmail, &user.Bio)
 	if err != nil {
 		return nil, err
 	}
