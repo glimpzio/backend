@@ -4,13 +4,21 @@ package model
 
 type Link struct {
 	ID     string `json:"id"`
-	UserID string `json:"userId"`
 	URL    string `json:"url"`
 	Expiry string `json:"expiry"`
 }
 
 type NewLink struct {
 	UserID string `json:"userId"`
+}
+
+type NewProfile struct {
+	Email     *string `json:"email,omitempty"`
+	Phone     *string `json:"phone,omitempty"`
+	Website   *string `json:"website,omitempty"`
+	Linkedin  *string `json:"linkedin,omitempty"`
+	Instagram *string `json:"instagram,omitempty"`
+	Facebook  *string `json:"facebook,omitempty"`
 }
 
 type NewUser struct {
@@ -20,17 +28,19 @@ type NewUser struct {
 	Bio   string `json:"bio"`
 }
 
-type User struct {
-	ID          string       `json:"id"`
-	Name        string       `json:"name"`
-	Email       string       `json:"email"`
-	Bio         string       `json:"bio"`
-	UserContact *UserContact `json:"userContact"`
+type Profile struct {
+	Email     *string `json:"email,omitempty"`
+	Phone     *string `json:"phone,omitempty"`
+	Website   *string `json:"website,omitempty"`
+	Linkedin  *string `json:"linkedin,omitempty"`
+	Instagram *string `json:"instagram,omitempty"`
+	Facebook  *string `json:"facebook,omitempty"`
 }
 
-type UserContact struct {
-	Email    *string `json:"email,omitempty"`
-	Phone    *string `json:"phone,omitempty"`
-	Website  *string `json:"website,omitempty"`
-	Linkedin *string `json:"linkedin,omitempty"`
+type User struct {
+	ID      string   `json:"id"`
+	Name    string   `json:"name"`
+	Email   string   `json:"email"`
+	Bio     string   `json:"bio"`
+	Profile *Profile `json:"profile"`
 }

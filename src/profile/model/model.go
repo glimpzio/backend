@@ -1,28 +1,35 @@
 package model
 
-import "time"
+import (
+	"database/sql"
+)
 
-type User struct {
-	Id    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Bio   string `json:"bio"`
+type Model struct {
+	Db *sql.DB
 }
 
-type UserProfile struct {
-	Id        string  `json:"id"`
-	UserId    string  `json:"userId"`
-	Email     *string `json:"email"`
-	Phone     *string `json:"phone"`
-	Website   *string `json:"website"`
-	LinkedIn  *string `json:"linkedin"`
-	Instagram *string `json:"instagram"`
-	Facebook  *string `json:"facebook"`
+// Create a new user
+func (m *Model) CreateUser(name string, email string, bio string) (*User, error) {
+	user := &User{}
+
+	err := m.Db.QueryRow("INSERT INTO users (name, email, bio) VALUES ($1, $2, $3) RETURNING id, name, email, bio", name, email, bio).Scan(&user.Id, &user.Name, &user.Email, &user.Bio)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
-type Link struct {
-	Id            string    `json:"name"`
-	UserProfileId string    `json:"userProfileId"`
-	Url           string    `json:"url"`
-	Expiry        time.Time `json:"expiry"`
+// Get a user
+func (m *Model) GetUser(id string) *User {
+	user := &User{}
+
+	err := m.Db.QueryRow("SELECT id, name, email, bio FROM users WHERE id = $1", id).Scan(&user.Id, &user.Name, &user.Email, &user.Bio)
+
+	if err != nil {
+		return nil
+	}
+
+	return user
 }

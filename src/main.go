@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -8,7 +9,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/glimpzio/backend/graph"
+	"github.com/glimpzio/backend/profile"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 const defaultPort = "8080"
@@ -26,8 +29,16 @@ func main() {
 	}
 
 	databaseUrl := os.Getenv("DATABASE_URL")
+	db, err := sql.Open("postgres", databaseUrl)
+	if err != nil {
+		logger.Fatalln(err)
+	}
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	// Initialize services
+	profileService := profile.NewProfileService(db)
+
+	// Initialize handlers
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Logger: logger, ProfileService: profileService}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)

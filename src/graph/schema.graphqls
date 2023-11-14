@@ -7,19 +7,20 @@ type User {
     name: String!
     email: String!
     bio: String!
-    userContact: UserContact!
+    profile: Profile!
 }
 
-type UserContact {
+type Profile {
     email: String
     phone: String
     website: String
     linkedin: String
+    instagram: String
+    facebook: String
 }
 
 type Link {
     id: ID!
-    userId: ID!
     url: String!
     expiry: String!
 }
@@ -39,7 +40,17 @@ input NewLink {
     userId: ID!
 }
 
+input NewProfile {
+    email: String
+    phone: String
+    website: String
+    linkedin: String
+    instagram: String
+    facebook: String
+}
+
 type Mutation {
   createUser(input: NewUser!): User!
   createLink(input: NewLink): Link!
+  updateProfile(input: NewProfile): Profile!
 }

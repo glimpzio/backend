@@ -26,6 +26,11 @@ func (r *mutationResolver) CreateLink(ctx context.Context, input *model.NewLink)
 	panic(fmt.Errorf("not implemented: CreateLink - createLink"))
 }
 
+// UpdateProfile is the resolver for the updateProfile field.
+func (r *mutationResolver) UpdateProfile(ctx context.Context, input *model.NewProfile) (*model.Profile, error) {
+	panic(fmt.Errorf("not implemented: UpdateProfile - updateProfile"))
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
 	return nil, errors.New("test")
