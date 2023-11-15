@@ -11,11 +11,6 @@ type contextKey string
 
 const authContextKey contextKey = "auth-key"
 
-// Extract the context
-func ExtractToken(ctx context.Context) *Token {
-	return nil
-}
-
 type Middleware struct {
 	Token *Token
 }
@@ -29,8 +24,6 @@ func GetMiddleware(ctx context.Context) *Middleware {
 	if token != nil {
 		out.Token = token
 	}
-
-	fmt.Println(out.Token.AuthId)
 
 	return out
 }
