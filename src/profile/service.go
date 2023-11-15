@@ -3,6 +3,7 @@ package profile
 import (
 	"database/sql"
 
+	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/profile/model"
 )
 
@@ -16,8 +17,8 @@ func NewProfileService(db *sql.DB) *ProfileService {
 }
 
 // Create a new user
-func (p *ProfileService) NewUser(user *NewUser) (*User, error) {
-	rawUser, err := p.model.CreateUser(user.Name, user.PersonalEmail, user.Bio)
+func (p *ProfileService) NewUser(token *auth.Token, user *NewUser) (*User, error) {
+	rawUser, err := p.model.CreateUser(token.AuthId, user.Name, user.PersonalEmail, user.Bio)
 
 	if err != nil {
 		return nil, err
@@ -27,8 +28,8 @@ func (p *ProfileService) NewUser(user *NewUser) (*User, error) {
 }
 
 // Get a user
-func (p *ProfileService) GetUser(userId string) *User {
-	rawUser := p.model.GetUser(userId)
+func (p *ProfileService) GetUser(token *auth.Token, id string) *User {
+	rawUser := p.model.GetUser(id)
 
 	if rawUser == nil {
 		return nil

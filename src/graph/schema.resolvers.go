@@ -7,17 +7,26 @@ package graph
 import (
 	"context"
 	"fmt"
-	"net/http"
 
+	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/graph/model"
+	"github.com/glimpzio/backend/profile"
 )
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
-	req, _ := ctx.Value("httpRequest").(*http.Request)
-	fmt.Println(req.Header.Get(("Authorization")))
+	middleware := auth.GetMiddleware(ctx)
+	if middleware.Token == nil {
+		return nil, auth.ErrMissingAuthHeader
+	}
 
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+	user, err := r.ProfileService.NewUser(middleware.Token, &profile.NewUser{Name: input.Name, PersonalEmail: input.Email, Bio: input.Bio})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
 }
 
 // CreateLink is the resolver for the createLink field.
@@ -32,7 +41,12 @@ func (r *mutationResolver) UpdateProfile(ctx context.Context, userID string, inp
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	user := r.ProfileService.GetUser(id)
+	middleware := auth.GetMiddleware(ctx)
+	if middleware.Token == nil {
+		return nil, auth.ErrMissingAuthHeader
+	}
+
+	user := r.ProfileService.GetUser(middleware.Token, id)
 
 	if user == nil {
 		return nil, nil

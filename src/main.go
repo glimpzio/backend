@@ -8,6 +8,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/graph"
 	"github.com/glimpzio/backend/profile"
 	"github.com/joho/godotenv"
@@ -41,7 +42,7 @@ func main() {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Logger: logger, ProfileService: profileService}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/query", auth.ApplyMiddleware(srv))
 
 	logger.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	logger.Fatal(http.ListenAndServe(":"+port, nil))
