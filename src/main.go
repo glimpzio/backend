@@ -35,6 +35,12 @@ func main() {
 		logger.Fatalln(err)
 	}
 
+	auth0Config := &auth.Auth0Config{
+		Auth0Domain:       os.Getenv("AUTH0_DOMAIN"),
+		Auth0ClientId:     os.Getenv("AUTH0_CLIENT_ID"),
+		Auth0ClientSecret: os.Getenv("AUTH0_CLIENT_SECRET"),
+	}
+
 	// Initialize services
 	profileService := profile.NewProfileService(db)
 
@@ -42,7 +48,7 @@ func main() {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Logger: logger, ProfileService: profileService}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", auth.ApplyMiddleware(srv))
+	http.Handle("/query", auth.ApplyMiddleware(logger, srv, auth0Config))
 
 	logger.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	logger.Fatal(http.ListenAndServe(":"+port, nil))
