@@ -3,9 +3,10 @@
 package model
 
 type Link struct {
-	ID        string `json:"id"`
-	UserID    string `json:"userId"`
-	ExpiresAt int    `json:"expiresAt"`
+	ID            string         `json:"id"`
+	UserID        string         `json:"userId"`
+	ExpiresAt     int            `json:"expiresAt"`
+	PublicProfile *PublicProfile `json:"publicProfile"`
 }
 
 type NewProfile struct {
@@ -29,6 +30,13 @@ type Profile struct {
 	Phone    *string `json:"phone,omitempty"`
 	Website  *string `json:"website,omitempty"`
 	Linkedin *string `json:"linkedin,omitempty"`
+}
+
+type PublicProfile struct {
+	Name           string   `json:"name"`
+	Bio            string   `json:"bio"`
+	ProfilePicture *string  `json:"profilePicture,omitempty"`
+	Profile        *Profile `json:"profile"`
 }
 
 type User struct {

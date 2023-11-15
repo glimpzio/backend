@@ -18,10 +18,18 @@ type Profile {
     linkedin: String
 }
 
+type PublicProfile {
+    name: String!
+    bio: String!
+    profilePicture: String
+    profile: Profile!
+}
+
 type Link {
     id: ID!
     userId: ID!
     expiresAt: Int!
+    publicProfile: PublicProfile!
 }
 
 type Query {

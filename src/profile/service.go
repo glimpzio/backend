@@ -2,6 +2,7 @@ package profile
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/glimpzio/backend/profile/model"
@@ -69,11 +70,20 @@ func (p *ProfileService) CreateLink(userId string) (*Link, error) {
 }
 
 // Get a link
-func (p *ProfileService) GetLink(id string) (*Link, error) {
+func (p *ProfileService) GetLink(id string) (*Link, *User, error) {
 	rawLink, err := p.model.GetLink(id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &Link{Id: rawLink.Id, UserId: rawLink.UserId, ExpiresAt: rawLink.ExpiresAt}, nil
+	if rawLink.ExpiresAt.Compare(time.Now()) < 0 {
+		return nil, nil, errors.New("link has expired")
+	}
+
+	rawUser, err := p.model.GetUserById(rawLink.UserId)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &Link{Id: rawLink.Id, UserId: rawLink.UserId, ExpiresAt: rawLink.ExpiresAt}, &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, ProfilePicture: rawUser.ProfilePicture, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
 }

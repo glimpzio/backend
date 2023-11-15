@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"time"
 
 	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/graph/model"
@@ -74,16 +73,12 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 
 // Link is the resolver for the link field.
 func (r *queryResolver) Link(ctx context.Context, id string) (*model.Link, error) {
-	link, err := r.ProfileService.GetLink(id)
+	link, user, err := r.ProfileService.GetLink(id)
 	if err != nil {
 		return nil, err
 	}
 
-	if link.ExpiresAt.Compare(time.Now()) < 0 {
-		return nil, auth.ErrExpired
-	}
-
-	return &model.Link{ID: link.Id, UserID: link.UserId, ExpiresAt: int(link.ExpiresAt.Unix())}, nil
+	return &model.Link{ID: link.Id, UserID: link.UserId, ExpiresAt: int(link.ExpiresAt.Unix()), PublicProfile: &model.PublicProfile{Name: user.Name, Bio: user.Bio, ProfilePicture: user.ProfilePicture, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}}, nil
 }
 
 // Mutation returns MutationResolver implementation.

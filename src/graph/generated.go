@@ -48,9 +48,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Link struct {
-		ExpiresAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		UserID    func(childComplexity int) int
+		ExpiresAt     func(childComplexity int) int
+		ID            func(childComplexity int) int
+		PublicProfile func(childComplexity int) int
+		UserID        func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -63,6 +64,13 @@ type ComplexityRoot struct {
 		Linkedin func(childComplexity int) int
 		Phone    func(childComplexity int) int
 		Website  func(childComplexity int) int
+	}
+
+	PublicProfile struct {
+		Bio            func(childComplexity int) int
+		Name           func(childComplexity int) int
+		Profile        func(childComplexity int) int
+		ProfilePicture func(childComplexity int) int
 	}
 
 	Query struct {
@@ -122,6 +130,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Link.ID(childComplexity), true
 
+	case "Link.publicProfile":
+		if e.complexity.Link.PublicProfile == nil {
+			break
+		}
+
+		return e.complexity.Link.PublicProfile(childComplexity), true
+
 	case "Link.userId":
 		if e.complexity.Link.UserID == nil {
 			break
@@ -175,6 +190,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Profile.Website(childComplexity), true
+
+	case "PublicProfile.bio":
+		if e.complexity.PublicProfile.Bio == nil {
+			break
+		}
+
+		return e.complexity.PublicProfile.Bio(childComplexity), true
+
+	case "PublicProfile.name":
+		if e.complexity.PublicProfile.Name == nil {
+			break
+		}
+
+		return e.complexity.PublicProfile.Name(childComplexity), true
+
+	case "PublicProfile.profile":
+		if e.complexity.PublicProfile.Profile == nil {
+			break
+		}
+
+		return e.complexity.PublicProfile.Profile(childComplexity), true
+
+	case "PublicProfile.profilePicture":
+		if e.complexity.PublicProfile.ProfilePicture == nil {
+			break
+		}
+
+		return e.complexity.PublicProfile.ProfilePicture(childComplexity), true
 
 	case "Query.link":
 		if e.complexity.Query.Link == nil {
@@ -578,6 +621,60 @@ func (ec *executionContext) fieldContext_Link_expiresAt(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Link_publicProfile(ctx context.Context, field graphql.CollectedField, obj *model.Link) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Link_publicProfile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PublicProfile, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PublicProfile)
+	fc.Result = res
+	return ec.marshalNPublicProfile2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐPublicProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Link_publicProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Link",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "name":
+				return ec.fieldContext_PublicProfile_name(ctx, field)
+			case "bio":
+				return ec.fieldContext_PublicProfile_bio(ctx, field)
+			case "profilePicture":
+				return ec.fieldContext_PublicProfile_profilePicture(ctx, field)
+			case "profile":
+				return ec.fieldContext_PublicProfile_profile(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PublicProfile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_upsertUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_upsertUser(ctx, field)
 	if err != nil {
@@ -692,6 +789,8 @@ func (ec *executionContext) fieldContext_Mutation_createLink(ctx context.Context
 				return ec.fieldContext_Link_userId(ctx, field)
 			case "expiresAt":
 				return ec.fieldContext_Link_expiresAt(ctx, field)
+			case "publicProfile":
+				return ec.fieldContext_Link_publicProfile(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Link", field.Name)
 		},
@@ -863,6 +962,189 @@ func (ec *executionContext) fieldContext_Profile_linkedin(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _PublicProfile_name(ctx context.Context, field graphql.CollectedField, obj *model.PublicProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PublicProfile_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PublicProfile_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PublicProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PublicProfile_bio(ctx context.Context, field graphql.CollectedField, obj *model.PublicProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PublicProfile_bio(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Bio, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PublicProfile_bio(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PublicProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PublicProfile_profilePicture(ctx context.Context, field graphql.CollectedField, obj *model.PublicProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PublicProfile_profilePicture(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProfilePicture, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PublicProfile_profilePicture(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PublicProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PublicProfile_profile(ctx context.Context, field graphql.CollectedField, obj *model.PublicProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PublicProfile_profile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Profile, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Profile)
+	fc.Result = res
+	return ec.marshalNProfile2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PublicProfile_profile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PublicProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "email":
+				return ec.fieldContext_Profile_email(ctx, field)
+			case "phone":
+				return ec.fieldContext_Profile_phone(ctx, field)
+			case "website":
+				return ec.fieldContext_Profile_website(ctx, field)
+			case "linkedin":
+				return ec.fieldContext_Profile_linkedin(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_user(ctx, field)
 	if err != nil {
@@ -966,6 +1248,8 @@ func (ec *executionContext) fieldContext_Query_link(ctx context.Context, field g
 				return ec.fieldContext_Link_userId(ctx, field)
 			case "expiresAt":
 				return ec.fieldContext_Link_expiresAt(ctx, field)
+			case "publicProfile":
+				return ec.fieldContext_Link_publicProfile(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Link", field.Name)
 		},
@@ -3321,6 +3605,11 @@ func (ec *executionContext) _Link(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "publicProfile":
+			out.Values[i] = ec._Link_publicProfile(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3419,6 +3708,57 @@ func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Profile_website(ctx, field, obj)
 		case "linkedin":
 			out.Values[i] = ec._Profile_linkedin(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var publicProfileImplementors = []string{"PublicProfile"}
+
+func (ec *executionContext) _PublicProfile(ctx context.Context, sel ast.SelectionSet, obj *model.PublicProfile) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, publicProfileImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PublicProfile")
+		case "name":
+			out.Values[i] = ec._PublicProfile_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "bio":
+			out.Values[i] = ec._PublicProfile_bio(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "profilePicture":
+			out.Values[i] = ec._PublicProfile_profilePicture(ctx, field, obj)
+		case "profile":
+			out.Values[i] = ec._PublicProfile_profile(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4000,6 +4340,16 @@ func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋglimpzioᚋbackend
 		return graphql.Null
 	}
 	return ec._Profile(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPublicProfile2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐPublicProfile(ctx context.Context, sel ast.SelectionSet, v *model.PublicProfile) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PublicProfile(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
