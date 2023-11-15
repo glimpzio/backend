@@ -8,7 +8,7 @@ import (
 
 type contextKey string
 
-const authContextKey contextKey = "auth-key"
+const authContextKey contextKey = "authKey"
 
 type Middleware struct {
 	Token *Token
