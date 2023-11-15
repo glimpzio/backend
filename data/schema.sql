@@ -8,6 +8,7 @@ CREATE TABLE users (
     personal_email TEXT NOT NULL,
     name TEXT NOT NULL,
     bio TEXT NOT NULL,
+    profile_picture TEXT,
     email TEXT,
     phone TEXT,
     website TEXT,

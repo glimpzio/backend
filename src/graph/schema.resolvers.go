@@ -19,13 +19,13 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		return nil, auth.ErrMissingAuthHeader
 	}
 
-	user, err := r.ProfileService.NewUser(&profile.NewUser{Id: middleware.Token.AuthId, Name: input.Name, PersonalEmail: input.Email, Bio: input.Bio, Profile: profile.Profile{Email: input.Profile.Email, Phone: input.Profile.Phone, Website: input.Profile.Website, Linkedin: input.Profile.Linkedin}})
+	user, err := r.ProfileService.NewUser(&profile.NewUser{Id: middleware.Token.AuthId, Name: input.Name, PersonalEmail: input.Email, Bio: input.Bio, ProfilePicture: input.ProfilePicture, Profile: profile.Profile{Email: input.Profile.Email, Phone: input.Profile.Phone, Website: input.Profile.Website, Linkedin: input.Profile.Linkedin}})
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
+	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, ProfilePicture: user.ProfilePicture, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
 }
 
 // UserByID is the resolver for the userById field.
@@ -43,7 +43,7 @@ func (r *queryResolver) UserByID(ctx context.Context, id string) (*model.User, e
 		return nil, auth.ErrNotAuthorized
 	}
 
-	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
+	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, ProfilePicture: user.ProfilePicture, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
 }
 
 // UserByAuthID is the resolver for the userByAuthId field.
@@ -61,7 +61,7 @@ func (r *queryResolver) UserByAuthID(ctx context.Context, authID string) (*model
 		return nil, auth.ErrNotAuthorized
 	}
 
-	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
+	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, ProfilePicture: user.ProfilePicture, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
 }
 
 // Mutation returns MutationResolver implementation.

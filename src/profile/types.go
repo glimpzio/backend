@@ -1,11 +1,12 @@
 package profile
 
 type NewUser struct {
-	Id            string  `json:"id"`
-	Name          string  `json:"name"`
-	PersonalEmail string  `json:"personalEmail"`
-	Bio           string  `json:"bio"`
-	Profile       Profile `json:"profile,omitempty"`
+	Id             string  `json:"id"`
+	Name           string  `json:"name"`
+	PersonalEmail  string  `json:"personalEmail"`
+	Bio            string  `json:"bio"`
+	ProfilePicture *string `json:"profilePicture"`
+	Profile        Profile `json:"profile,omitempty"`
 }
 
 type Profile struct {
@@ -16,10 +17,11 @@ type Profile struct {
 }
 
 type User struct {
-	Id      string   `json:"id"`
-	AuthId  string   `json:"authId"`
-	Name    string   `json:"name"`
-	Email   string   `json:"email"`
-	Bio     string   `json:"bio"`
-	Profile *Profile `json:"profile"`
+	Id             string   `json:"id"`
+	AuthId         string   `json:"authId"`
+	Name           string   `json:"name"`
+	Email          string   `json:"email"`
+	Bio            string   `json:"bio"`
+	ProfilePicture *string  `json:"profilePicture"`
+	Profile        *Profile `json:"profile"`
 }

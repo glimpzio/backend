@@ -10,10 +10,11 @@ type NewProfile struct {
 }
 
 type NewUser struct {
-	Name    string      `json:"name"`
-	Email   string      `json:"email"`
-	Bio     string      `json:"bio"`
-	Profile *NewProfile `json:"profile"`
+	Name           string      `json:"name"`
+	Email          string      `json:"email"`
+	Bio            string      `json:"bio"`
+	ProfilePicture *string     `json:"profilePicture,omitempty"`
+	Profile        *NewProfile `json:"profile"`
 }
 
 type Profile struct {
@@ -24,9 +25,10 @@ type Profile struct {
 }
 
 type User struct {
-	ID      string   `json:"id"`
-	Name    string   `json:"name"`
-	Email   string   `json:"email"`
-	Bio     string   `json:"bio"`
-	Profile *Profile `json:"profile"`
+	ID             string   `json:"id"`
+	Name           string   `json:"name"`
+	Email          string   `json:"email"`
+	Bio            string   `json:"bio"`
+	ProfilePicture *string  `json:"profilePicture,omitempty"`
+	Profile        *Profile `json:"profile"`
 }

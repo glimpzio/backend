@@ -17,13 +17,13 @@ func NewProfileService(db *sql.DB) *ProfileService {
 
 // Create a new user
 func (p *ProfileService) NewUser(user *NewUser) (*User, error) {
-	rawUser, err := p.model.CreateUser(user.Id, user.Name, user.PersonalEmail, user.Bio, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
+	rawUser, err := p.model.CreateUser(user.Id, user.Name, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &User{Id: rawUser.Id, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
+	return &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, ProfilePicture: user.ProfilePicture, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
 }
 
 // Get a user by id
@@ -34,7 +34,7 @@ func (p *ProfileService) GetUserById(id string) (*User, error) {
 		return nil, err
 	}
 
-	return &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
+	return &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, ProfilePicture: rawUser.ProfilePicture, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
 }
 
 // Get a user by auth id
@@ -45,5 +45,5 @@ func (p *ProfileService) GetUserByAuthId(authId string) (*User, error) {
 		return nil, err
 	}
 
-	return &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
+	return &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, ProfilePicture: rawUser.ProfilePicture, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
 }

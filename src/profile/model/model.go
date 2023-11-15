@@ -9,7 +9,7 @@ type Model struct {
 }
 
 // Create a new user
-func (m *Model) CreateUser(authId string, name string, personalEmail string, bio string, email *string, phone *string, website *string, linkedin *string) (*User, error) {
+func (m *Model) CreateUser(authId string, name string, personalEmail string, bio string, profilePicture *string, email *string, phone *string, website *string, linkedin *string) (*User, error) {
 	user := &User{}
 
 	tx, err := m.Db.Begin()
@@ -18,7 +18,7 @@ func (m *Model) CreateUser(authId string, name string, personalEmail string, bio
 		return nil, err
 	}
 
-	err = tx.QueryRow("SELECT id, auth_id, name, personal_email, bio, email, phone, website, linkedin FROM users WHERE auth_id = $1", authId).Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
+	err = tx.QueryRow("SELECT id, auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin FROM users WHERE auth_id = $1", authId).Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
 	if err != sql.ErrNoRows {
 		if err != nil {
 			tx.Rollback()
@@ -30,7 +30,7 @@ func (m *Model) CreateUser(authId string, name string, personalEmail string, bio
 		return user, nil
 	}
 
-	err = tx.QueryRow("INSERT INTO users (auth_id, name, personal_email, bio, email, phone, website, linkedin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, auth_id, name, personal_email, bio, email, phone, website, linkedin", authId, name, personalEmail, bio, email, phone, website, linkedin).Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
+	err = tx.QueryRow("INSERT INTO users (auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin", authId, name, personalEmail, bio, profilePicture, email, phone, website, linkedin).Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (m *Model) CreateUser(authId string, name string, personalEmail string, bio
 func (m *Model) GetUserById(id string) (*User, error) {
 	user := &User{}
 
-	err := m.Db.QueryRow("SELECT id, auth_id, name, personal_email, bio, email, phone, website, linkedin FROM users WHERE id = $1", id).Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
+	err := m.Db.QueryRow("SELECT id, auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin FROM users WHERE id = $1", id).Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (m *Model) GetUserById(id string) (*User, error) {
 func (m *Model) GetUserByAuthId(authId string) (*User, error) {
 	user := &User{}
 
-	err := m.Db.QueryRow("SELECT id, auth_id, name, personal_email, bio, email, phone, website, linkedin FROM users WHERE auth_id = $1", authId).Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
+	err := m.Db.QueryRow("SELECT id, auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin FROM users WHERE auth_id = $1", authId).Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
 	if err != nil {
 		return nil, err
 	}
