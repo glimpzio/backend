@@ -17,35 +17,24 @@ type Profile {
     linkedin: String
 }
 
-type Link {
-    id: ID!
-    url: String!
-    expiry: String!
-}
-
 type Query {
     user(id: ID!): User
 }
 
-input NewUser {
-    name: String!
-    email: String!
-    bio: String!
-}
-
-input NewLink {
-    userId: ID!
-}
-
-input UpdatedProfile {
+input NewProfile {
     email: String
     phone: String
     website: String
     linkedin: String
 }
 
+input NewUser {
+    name: String!
+    email: String!
+    bio: String!
+    profile: NewProfile!
+}
+
 type Mutation {
   createUser(input: NewUser!): User!
-  createLink(input: NewLink!): Link!
-  updateProfile(userId: ID!, input: UpdatedProfile!): Profile!
 }

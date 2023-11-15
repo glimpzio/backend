@@ -1,9 +1,10 @@
 package profile
 
 type NewUser struct {
-	Name          string `json:"name"`
-	PersonalEmail string `json:"personalEmail"`
-	Bio           string `json:"bio"`
+	Name          string  `json:"name"`
+	PersonalEmail string  `json:"personalEmail"`
+	Bio           string  `json:"bio"`
+	Profile       Profile `json:"profile,omitempty"`
 }
 
 type Profile struct {

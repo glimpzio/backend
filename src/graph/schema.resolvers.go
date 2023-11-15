@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/graph/model"
@@ -20,23 +19,13 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		return nil, auth.ErrMissingAuthHeader
 	}
 
-	user, err := r.ProfileService.NewUser(middleware.Token, &profile.NewUser{Name: input.Name, PersonalEmail: input.Email, Bio: input.Bio})
+	user, err := r.ProfileService.NewUser(middleware.Token, &profile.NewUser{Name: input.Name, PersonalEmail: input.Email, Bio: input.Bio, Profile: profile.Profile{Email: input.Profile.Email, Phone: input.Profile.Phone, Website: input.Profile.Website, Linkedin: input.Profile.Linkedin}})
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
-}
-
-// CreateLink is the resolver for the createLink field.
-func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
-	panic(fmt.Errorf("not implemented: CreateLink - createLink"))
-}
-
-// UpdateProfile is the resolver for the updateProfile field.
-func (r *mutationResolver) UpdateProfile(ctx context.Context, userID string, input model.UpdatedProfile) (*model.Profile, error) {
-	panic(fmt.Errorf("not implemented: UpdateProfile - updateProfile"))
 }
 
 // User is the resolver for the user field.

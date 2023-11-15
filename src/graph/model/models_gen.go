@@ -2,30 +2,21 @@
 
 package model
 
-type Link struct {
-	ID     string `json:"id"`
-	URL    string `json:"url"`
-	Expiry string `json:"expiry"`
-}
-
-type NewLink struct {
-	UserID string `json:"userId"`
-}
-
-type NewUser struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Bio   string `json:"bio"`
-}
-
-type Profile struct {
+type NewProfile struct {
 	Email    *string `json:"email,omitempty"`
 	Phone    *string `json:"phone,omitempty"`
 	Website  *string `json:"website,omitempty"`
 	Linkedin *string `json:"linkedin,omitempty"`
 }
 
-type UpdatedProfile struct {
+type NewUser struct {
+	Name    string      `json:"name"`
+	Email   string      `json:"email"`
+	Bio     string      `json:"bio"`
+	Profile *NewProfile `json:"profile"`
+}
+
+type Profile struct {
 	Email    *string `json:"email,omitempty"`
 	Phone    *string `json:"phone,omitempty"`
 	Website  *string `json:"website,omitempty"`

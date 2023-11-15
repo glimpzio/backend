@@ -18,7 +18,7 @@ func NewProfileService(db *sql.DB) *ProfileService {
 
 // Create a new user
 func (p *ProfileService) NewUser(token *auth.Token, user *NewUser) (*User, error) {
-	rawUser, err := p.model.CreateUser(token.AuthId, user.Name, user.PersonalEmail, user.Bio)
+	rawUser, err := p.model.CreateUser(token.AuthId, user.Name, user.PersonalEmail, user.Bio, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
 
 	if err != nil {
 		return nil, err
