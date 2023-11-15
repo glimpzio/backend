@@ -19,6 +19,14 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 		return nil, auth.ErrMissingAuthHeader
 	}
 
+	if input.ID != nil {
+		existingUser, err := r.ProfileService.GetUserById(*input.ID)
+
+		if err == nil && existingUser.AuthId != middleware.Token.AuthId {
+			return nil, auth.ErrNotAuthorized
+		}
+	}
+
 	user, err := r.ProfileService.UpsertUser(&profile.NewUser{Id: input.ID, AuthId: middleware.Token.AuthId, Name: input.Name, PersonalEmail: input.Email, Bio: input.Bio, ProfilePicture: input.ProfilePicture, Profile: &profile.Profile{Email: input.Profile.Email, Phone: input.Profile.Phone, Website: input.Profile.Website, Linkedin: input.Profile.Linkedin}})
 	if err != nil {
 		return nil, err
