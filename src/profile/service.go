@@ -15,9 +15,16 @@ func NewProfileService(db *sql.DB) *ProfileService {
 	return &ProfileService{model: &model.Model{Db: db}}
 }
 
-// Create a new user
-func (p *ProfileService) NewUser(user *NewUser) (*User, error) {
-	rawUser, err := p.model.CreateUser(user.Id, user.Name, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
+// Upsert a user
+func (p *ProfileService) UpsertUser(user *NewUser) (*User, error) {
+	var rawUser *model.User
+	var err error
+
+	if user.Id == nil {
+		rawUser, err = p.model.CreateUser(user.AuthId, user.Name, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
+	} else {
+		rawUser, err = p.model.UpdateUser(*user.Id, user.Name, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
+	}
 
 	if err != nil {
 		return nil, err

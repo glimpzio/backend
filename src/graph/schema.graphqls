@@ -31,6 +31,7 @@ input NewProfile {
 }
 
 input NewUser {
+    id: ID
     name: String!
     email: String!
     bio: String!
@@ -39,5 +40,5 @@ input NewUser {
 }
 
 type Mutation {
-  createUser(input: NewUser!): User!
+  upsertUser(input: NewUser!): User!
 }

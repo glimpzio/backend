@@ -12,15 +12,14 @@ import (
 	"github.com/glimpzio/backend/profile"
 )
 
-// CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
+// UpsertUser is the resolver for the upsertUser field.
+func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) (*model.User, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
 		return nil, auth.ErrMissingAuthHeader
 	}
 
-	user, err := r.ProfileService.NewUser(&profile.NewUser{Id: middleware.Token.AuthId, Name: input.Name, PersonalEmail: input.Email, Bio: input.Bio, ProfilePicture: input.ProfilePicture, Profile: profile.Profile{Email: input.Profile.Email, Phone: input.Profile.Phone, Website: input.Profile.Website, Linkedin: input.Profile.Linkedin}})
-
+	user, err := r.ProfileService.UpsertUser(&profile.NewUser{Id: input.ID, AuthId: middleware.Token.AuthId, Name: input.Name, PersonalEmail: input.Email, Bio: input.Bio, ProfilePicture: input.ProfilePicture, Profile: &profile.Profile{Email: input.Profile.Email, Phone: input.Profile.Phone, Website: input.Profile.Website, Linkedin: input.Profile.Linkedin}})
 	if err != nil {
 		return nil, err
 	}

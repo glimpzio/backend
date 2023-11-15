@@ -43,6 +43,18 @@ func (m *Model) CreateUser(authId string, name string, personalEmail string, bio
 	return user, nil
 }
 
+// Update a user
+func (m *Model) UpdateUser(id string, name string, personalEmail string, bio string, profilePicture *string, email *string, phone *string, website *string, linkedin *string) (*User, error) {
+	user := &User{}
+
+	err := m.Db.QueryRow("UPDATE users SET name = $1, personal_email = $2, bio = $3, profile_picture = $4, email = $5, phone = $6, website = $7, linkedin = $8 WHERE id = $9 RETURNING id, auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin", name, personalEmail, bio, profilePicture, email, phone, website, linkedin, id).Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 // Get a user by their id
 func (m *Model) GetUserById(id string) (*User, error) {
 	user := &User{}
