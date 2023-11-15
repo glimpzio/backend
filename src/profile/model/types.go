@@ -18,6 +18,5 @@ type User struct {
 type Link struct {
 	Id        string    `json:"id"`
 	UserId    string    `json:"userId"`
-	Url       string    `json:"url"`
 	ExpiresAt time.Time `json:"expiresAt"`
 }

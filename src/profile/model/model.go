@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"time"
 )
 
 type Model struct {
@@ -77,4 +78,28 @@ func (m *Model) GetUserByAuthId(authId string) (*User, error) {
 	}
 
 	return user, nil
+}
+
+// Create a new link
+func (m *Model) CreateLink(userId string, expiresAt time.Time) (*Link, error) {
+	link := &Link{}
+
+	err := m.Db.QueryRow("INSERT INTO links (user_id, expires_at) VALUES ($1, $2) RETURNING id, user_id, expires_at", userId, expiresAt).Scan(&link.Id, &link.UserId, &link.ExpiresAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return link, nil
+}
+
+// Get a new link
+func (m *Model) GetLink(id string) (*Link, error) {
+	link := &Link{}
+
+	err := m.Db.QueryRow("SELECT id, user_id, expires_at FROM links WHERE id = $1", id).Scan(&link.Id, &link.UserId, &link.ExpiresAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return link, nil
 }
