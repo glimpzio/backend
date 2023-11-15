@@ -1,6 +1,7 @@
 package profile
 
 type NewUser struct {
+	Id            string  `json:"id"`
 	Name          string  `json:"name"`
 	PersonalEmail string  `json:"personalEmail"`
 	Bio           string  `json:"bio"`

@@ -19,7 +19,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		return nil, auth.ErrMissingAuthHeader
 	}
 
-	user, err := r.ProfileService.NewUser(middleware.Token, &profile.NewUser{Name: input.Name, PersonalEmail: input.Email, Bio: input.Bio, Profile: profile.Profile{Email: input.Profile.Email, Phone: input.Profile.Phone, Website: input.Profile.Website, Linkedin: input.Profile.Linkedin}})
+	user, err := r.ProfileService.NewUser(&profile.NewUser{Id: middleware.Token.AuthId, Name: input.Name, PersonalEmail: input.Email, Bio: input.Bio, Profile: profile.Profile{Email: input.Profile.Email, Phone: input.Profile.Phone, Website: input.Profile.Website, Linkedin: input.Profile.Linkedin}})
 
 	if err != nil {
 		return nil, err
@@ -35,10 +35,12 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error
 		return nil, auth.ErrMissingAuthHeader
 	}
 
-	user := r.ProfileService.GetUser(middleware.Token, id)
+	user := r.ProfileService.GetUser(id)
 
 	if user == nil {
 		return nil, nil
+	} else if user.Id != middleware.Token.AuthId {
+		return nil, auth.ErrNotAuthorized
 	}
 
 	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
