@@ -32,7 +32,20 @@ func (p *ProfileService) UpsertUser(user *NewUser) (*User, error) {
 		return nil, err
 	}
 
-	return &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, ProfilePicture: user.ProfilePicture, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
+	return &User{
+		Id:             rawUser.Id,
+		AuthId:         rawUser.AuthId,
+		Name:           rawUser.Name,
+		Email:          rawUser.PersonalEmail,
+		Bio:            rawUser.Bio,
+		ProfilePicture: user.ProfilePicture,
+		Profile: &Profile{
+			Email:    rawUser.Email,
+			Phone:    rawUser.Phone,
+			Website:  rawUser.Website,
+			Linkedin: rawUser.LinkedIn,
+		},
+	}, nil
 }
 
 // Get a user by id
@@ -43,7 +56,20 @@ func (p *ProfileService) GetUserById(id string) (*User, error) {
 		return nil, err
 	}
 
-	return &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, ProfilePicture: rawUser.ProfilePicture, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
+	return &User{
+		Id:             rawUser.Id,
+		AuthId:         rawUser.AuthId,
+		Name:           rawUser.Name,
+		Email:          rawUser.PersonalEmail,
+		Bio:            rawUser.Bio,
+		ProfilePicture: rawUser.ProfilePicture,
+		Profile: &Profile{
+			Email:    rawUser.Email,
+			Phone:    rawUser.Phone,
+			Website:  rawUser.Website,
+			Linkedin: rawUser.LinkedIn,
+		},
+	}, nil
 }
 
 // Get a user by auth id
@@ -54,7 +80,20 @@ func (p *ProfileService) GetUserByAuthId(authId string) (*User, error) {
 		return nil, err
 	}
 
-	return &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, ProfilePicture: rawUser.ProfilePicture, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
+	return &User{
+		Id:             rawUser.Id,
+		AuthId:         rawUser.AuthId,
+		Name:           rawUser.Name,
+		Email:          rawUser.PersonalEmail,
+		Bio:            rawUser.Bio,
+		ProfilePicture: rawUser.ProfilePicture,
+		Profile: &Profile{
+			Email:    rawUser.Email,
+			Phone:    rawUser.Phone,
+			Website:  rawUser.Website,
+			Linkedin: rawUser.LinkedIn,
+		},
+	}, nil
 }
 
 // Create a new link
@@ -66,7 +105,11 @@ func (p *ProfileService) CreateLink(userId string) (*Link, error) {
 		return nil, err
 	}
 
-	return &Link{Id: rawLink.Id, UserId: rawLink.UserId, ExpiresAt: rawLink.ExpiresAt}, nil
+	return &Link{
+		Id:        rawLink.Id,
+		UserId:    rawLink.UserId,
+		ExpiresAt: rawLink.ExpiresAt,
+	}, nil
 }
 
 // Get a link
@@ -85,5 +128,22 @@ func (p *ProfileService) GetLink(id string) (*Link, *User, error) {
 		return nil, nil, err
 	}
 
-	return &Link{Id: rawLink.Id, UserId: rawLink.UserId, ExpiresAt: rawLink.ExpiresAt}, &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, ProfilePicture: rawUser.ProfilePicture, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
+	return &Link{
+			Id:        rawLink.Id,
+			UserId:    rawLink.UserId,
+			ExpiresAt: rawLink.ExpiresAt,
+		}, &User{
+			Id:             rawUser.Id,
+			AuthId:         rawUser.AuthId,
+			Name:           rawUser.Name,
+			Email:          rawUser.PersonalEmail,
+			Bio:            rawUser.Bio,
+			ProfilePicture: rawUser.ProfilePicture,
+			Profile: &Profile{
+				Email:    rawUser.Email,
+				Phone:    rawUser.Phone,
+				Website:  rawUser.Website,
+				Linkedin: rawUser.LinkedIn,
+			},
+		}, nil
 }

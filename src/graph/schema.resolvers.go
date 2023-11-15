@@ -27,12 +27,37 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 		}
 	}
 
-	user, err := r.ProfileService.UpsertUser(&profile.NewUser{Id: input.ID, AuthId: middleware.Token.AuthId, Name: input.Name, PersonalEmail: input.Email, Bio: input.Bio, ProfilePicture: input.ProfilePicture, Profile: &profile.Profile{Email: input.Profile.Email, Phone: input.Profile.Phone, Website: input.Profile.Website, Linkedin: input.Profile.Linkedin}})
+	user, err := r.ProfileService.UpsertUser(&profile.NewUser{
+		Id:             input.ID,
+		AuthId:         middleware.Token.AuthId,
+		Name:           input.Name,
+		PersonalEmail:  input.Email,
+		Bio:            input.Bio,
+		ProfilePicture: input.ProfilePicture,
+		Profile: &profile.Profile{
+			Email:    input.Profile.Email,
+			Phone:    input.Profile.Phone,
+			Website:  input.Profile.Website,
+			Linkedin: input.Profile.Linkedin,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, ProfilePicture: user.ProfilePicture, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
+	return &model.User{
+		ID:             user.Id,
+		Name:           user.Name,
+		Email:          user.Email,
+		Bio:            user.Bio,
+		ProfilePicture: user.ProfilePicture,
+		Profile: &model.Profile{
+			Email:    user.Profile.Email,
+			Phone:    user.Profile.Phone,
+			Website:  user.Profile.Website,
+			Linkedin: user.Profile.Linkedin,
+		},
+	}, nil
 }
 
 // CreateLink is the resolver for the createLink field.
@@ -52,7 +77,11 @@ func (r *mutationResolver) CreateLink(ctx context.Context) (*model.Link, error) 
 		return nil, err
 	}
 
-	return &model.Link{ID: link.Id, UserID: link.UserId, ExpiresAt: int(link.ExpiresAt.Unix())}, nil
+	return &model.Link{
+		ID:        link.Id,
+		UserID:    link.UserId,
+		ExpiresAt: int(link.ExpiresAt.Unix()),
+	}, nil
 }
 
 // User is the resolver for the user field.
@@ -68,7 +97,19 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 		return nil, err
 	}
 
-	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, ProfilePicture: user.ProfilePicture, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
+	return &model.User{
+		ID:             user.Id,
+		Name:           user.Name,
+		Email:          user.Email,
+		Bio:            user.Bio,
+		ProfilePicture: user.ProfilePicture,
+		Profile: &model.Profile{
+			Email:    user.Profile.Email,
+			Phone:    user.Profile.Phone,
+			Website:  user.Profile.Website,
+			Linkedin: user.Profile.Linkedin,
+		},
+	}, nil
 }
 
 // Link is the resolver for the link field.
@@ -78,7 +119,22 @@ func (r *queryResolver) Link(ctx context.Context, id string) (*model.Link, error
 		return nil, err
 	}
 
-	return &model.Link{ID: link.Id, UserID: link.UserId, ExpiresAt: int(link.ExpiresAt.Unix()), PublicProfile: &model.PublicProfile{Name: user.Name, Bio: user.Bio, ProfilePicture: user.ProfilePicture, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}}, nil
+	return &model.Link{
+		ID:        link.Id,
+		UserID:    link.UserId,
+		ExpiresAt: int(link.ExpiresAt.Unix()),
+		PublicProfile: &model.PublicProfile{
+			Name:           user.Name,
+			Bio:            user.Bio,
+			ProfilePicture: user.ProfilePicture,
+			Profile: &model.Profile{
+				Email:    user.Profile.Email,
+				Phone:    user.Profile.Phone,
+				Website:  user.Profile.Website,
+				Linkedin: user.Profile.Linkedin,
+			},
+		},
+	}, nil
 }
 
 // Mutation returns MutationResolver implementation.
