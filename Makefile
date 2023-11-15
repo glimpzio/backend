@@ -11,9 +11,6 @@ seed:
 down:
 	docker-compose -f $(FILE) down
 
-restart:
-	docker-compose -f $(FILE) restart
-
 run:
 	cd src && go run main.go
 
