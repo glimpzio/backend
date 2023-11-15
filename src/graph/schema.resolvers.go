@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"time"
 
 	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/graph/model"
@@ -35,8 +36,28 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, ProfilePicture: user.ProfilePicture, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
 }
 
-// UserByID is the resolver for the userById field.
-func (r *queryResolver) UserByID(ctx context.Context, id string) (*model.User, error) {
+// CreateLink is the resolver for the createLink field.
+func (r *mutationResolver) CreateLink(ctx context.Context) (*model.Link, error) {
+	middleware := auth.GetMiddleware(ctx)
+	if middleware.Token == nil {
+		return nil, auth.ErrMissingAuthHeader
+	}
+
+	user, err := r.ProfileService.GetUserByAuthId(middleware.Token.AuthId)
+	if err != nil {
+		return nil, err
+	}
+
+	link, err := r.ProfileService.CreateLink(user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Link{ID: link.Id, UserID: link.UserId, ExpiresAt: int(link.ExpiresAt.Unix())}, nil
+}
+
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
 		return nil, auth.ErrMissingAuthHeader
@@ -46,29 +67,28 @@ func (r *queryResolver) UserByID(ctx context.Context, id string) (*model.User, e
 
 	if err != nil {
 		return nil, err
-	} else if user.Id != id {
-		return nil, auth.ErrNotAuthorized
 	}
 
 	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, ProfilePicture: user.ProfilePicture, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
 }
 
-// UserByAuthID is the resolver for the userByAuthId field.
-func (r *queryResolver) UserByAuthID(ctx context.Context, authID string) (*model.User, error) {
+// Link is the resolver for the link field.
+func (r *queryResolver) Link(ctx context.Context, id string) (*model.Link, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
 		return nil, auth.ErrMissingAuthHeader
 	}
 
-	user, err := r.ProfileService.GetUserByAuthId(middleware.Token.AuthId)
-
+	link, err := r.ProfileService.GetLink(id)
 	if err != nil {
 		return nil, err
-	} else if user.AuthId != authID {
-		return nil, auth.ErrNotAuthorized
 	}
 
-	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, ProfilePicture: user.ProfilePicture, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
+	if link.ExpiresAt.Compare(time.Now()) < 0 {
+		return nil, auth.ErrExpired
+	}
+
+	return &model.Link{ID: link.Id, UserID: link.UserId, ExpiresAt: int(link.ExpiresAt.Unix())}, nil
 }
 
 // Mutation returns MutationResolver implementation.

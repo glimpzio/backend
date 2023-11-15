@@ -2,6 +2,12 @@
 
 package model
 
+type Link struct {
+	ID        string `json:"id"`
+	UserID    string `json:"userId"`
+	ExpiresAt int    `json:"expiresAt"`
+}
+
 type NewProfile struct {
 	Email    *string `json:"email,omitempty"`
 	Phone    *string `json:"phone,omitempty"`
