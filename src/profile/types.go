@@ -17,6 +17,7 @@ type Profile struct {
 
 type User struct {
 	Id      string   `json:"id"`
+	AuthId  string   `json:"authId"`
 	Name    string   `json:"name"`
 	Email   string   `json:"email"`
 	Bio     string   `json:"bio"`

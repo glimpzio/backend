@@ -26,13 +26,24 @@ func (p *ProfileService) NewUser(user *NewUser) (*User, error) {
 	return &User{Id: rawUser.Id, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
 }
 
-// Get a user
-func (p *ProfileService) GetUser(id string) *User {
-	rawUser := p.model.GetUser(id)
+// Get a user by id
+func (p *ProfileService) GetUserById(id string) (*User, error) {
+	rawUser, err := p.model.GetUserById(id)
 
-	if rawUser == nil {
-		return nil
+	if err != nil {
+		return nil, err
 	}
 
-	return &User{Id: rawUser.Id, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}
+	return &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
+}
+
+// Get a user by auth id
+func (p *ProfileService) GetUserByAuthId(authId string) (*User, error) {
+	rawUser, err := p.model.GetUserByAuthId(authId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
 }

@@ -28,18 +28,36 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
 }
 
-// User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+// UserByID is the resolver for the userById field.
+func (r *queryResolver) UserByID(ctx context.Context, id string) (*model.User, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
 		return nil, auth.ErrMissingAuthHeader
 	}
 
-	user := r.ProfileService.GetUser(id)
+	user, err := r.ProfileService.GetUserByAuthId(middleware.Token.AuthId)
 
-	if user == nil {
-		return nil, nil
-	} else if user.Id != middleware.Token.AuthId {
+	if err != nil {
+		return nil, err
+	} else if user.Id != id {
+		return nil, auth.ErrNotAuthorized
+	}
+
+	return &model.User{ID: user.Id, Name: user.Name, Email: user.Email, Bio: user.Bio, Profile: &model.Profile{Email: user.Profile.Email, Phone: user.Profile.Phone, Website: user.Profile.Website, Linkedin: user.Profile.Linkedin}}, nil
+}
+
+// UserByAuthID is the resolver for the userByAuthId field.
+func (r *queryResolver) UserByAuthID(ctx context.Context, authID string) (*model.User, error) {
+	middleware := auth.GetMiddleware(ctx)
+	if middleware.Token == nil {
+		return nil, auth.ErrMissingAuthHeader
+	}
+
+	user, err := r.ProfileService.GetUserByAuthId(middleware.Token.AuthId)
+
+	if err != nil {
+		return nil, err
+	} else if user.AuthId != authID {
 		return nil, auth.ErrNotAuthorized
 	}
 
