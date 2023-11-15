@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type User struct {
 	Id             string  `json:"id"`
 	AuthId         string  `json:"authId"`
@@ -11,4 +13,11 @@ type User struct {
 	Phone          *string `json:"phone,omitempty"`
 	Website        *string `json:"website,omitempty"`
 	LinkedIn       *string `json:"linkedin,omitempty"`
+}
+
+type Link struct {
+	Id        string    `json:"id"`
+	UserId    string    `json:"userId"`
+	Url       string    `json:"url"`
+	ExpiresAt time.Time `json:"expiresAt"`
 }
