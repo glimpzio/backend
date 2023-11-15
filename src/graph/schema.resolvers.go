@@ -74,11 +74,6 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 
 // Link is the resolver for the link field.
 func (r *queryResolver) Link(ctx context.Context, id string) (*model.Link, error) {
-	middleware := auth.GetMiddleware(ctx)
-	if middleware.Token == nil {
-		return nil, auth.ErrMissingAuthHeader
-	}
-
 	link, err := r.ProfileService.GetLink(id)
 	if err != nil {
 		return nil, err
