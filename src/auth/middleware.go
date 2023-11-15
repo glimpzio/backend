@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -19,10 +18,10 @@ type Middleware struct {
 func GetMiddleware(ctx context.Context) *Middleware {
 	out := &Middleware{Token: nil}
 
-	token := ctx.Value(authContextKey).(*Token)
+	token := ctx.Value(authContextKey)
 
 	if token != nil {
-		out.Token = token
+		out.Token = token.(*Token)
 	}
 
 	return out
@@ -31,8 +30,6 @@ func GetMiddleware(ctx context.Context) *Middleware {
 // Apply middleware
 func ApplyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.Header)
-
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			next.ServeHTTP(w, r)
