@@ -2,6 +2,7 @@ package profile
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/glimpzio/backend/profile/model"
 )
@@ -53,4 +54,26 @@ func (p *ProfileService) GetUserByAuthId(authId string) (*User, error) {
 	}
 
 	return &User{Id: rawUser.Id, AuthId: rawUser.AuthId, Name: rawUser.Name, Email: rawUser.PersonalEmail, Bio: rawUser.Bio, ProfilePicture: rawUser.ProfilePicture, Profile: &Profile{Email: rawUser.Email, Phone: rawUser.Phone, Website: rawUser.Website, Linkedin: rawUser.LinkedIn}}, nil
+}
+
+// Create a new link
+func (p *ProfileService) CreateLink(userId string) (*Link, error) {
+	expiresAt := time.Time.Add(time.Now(), time.Duration(time.Duration.Hours(24)))
+
+	rawLink, err := p.model.CreateLink(userId, expiresAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Link{Id: rawLink.Id, UserId: rawLink.UserId, ExpiresAt: rawLink.ExpiresAt}, nil
+}
+
+// Get a link
+func (p *ProfileService) GetLink(id string) (*Link, error) {
+	rawLink, err := p.model.GetLink(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Link{Id: rawLink.Id, UserId: rawLink.UserId, ExpiresAt: rawLink.ExpiresAt}, nil
 }

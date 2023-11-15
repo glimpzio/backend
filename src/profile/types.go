@@ -1,5 +1,7 @@
 package profile
 
+import "time"
+
 type NewUser struct {
 	Id             *string  `json:"id,omitempty"`
 	AuthId         string   `json:"authId"`
@@ -25,4 +27,10 @@ type User struct {
 	Bio            string   `json:"bio"`
 	ProfilePicture *string  `json:"profilePicture,omitempty"`
 	Profile        *Profile `json:"profile"`
+}
+
+type Link struct {
+	Id        string    `json:"id"`
+	UserId    string    `json:"userId"`
+	ExpiresAt time.Time `json:"expiresAt"`
 }
