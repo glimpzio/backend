@@ -29,8 +29,7 @@ func main() {
 		port = defaultPort
 	}
 
-	databaseUrl := os.Getenv("DATABASE_URL")
-	db, err := sql.Open("postgres", databaseUrl)
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		logger.ErrorLog.Fatalln(err)
 	}
@@ -41,8 +40,10 @@ func main() {
 		Auth0ClientSecret: os.Getenv("AUTH0_CLIENT_SECRET"),
 	}
 
+	mailList := misc.NewMailList(os.Getenv("SENDGRID_API_KEY"), os.Getenv("SENGRID_LIST_ID"))
+
 	// Initialize services
-	profileService := profile.NewProfileService(db)
+	profileService := profile.NewProfileService(db, mailList)
 
 	// Initialize handlers
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Logger: logger, ProfileService: profileService}}))

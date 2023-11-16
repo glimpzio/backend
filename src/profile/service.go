@@ -5,16 +5,18 @@ import (
 	"errors"
 	"time"
 
+	"github.com/glimpzio/backend/misc"
 	"github.com/glimpzio/backend/profile/model"
 )
 
 type ProfileService struct {
-	model *model.Model
+	model    *model.Model
+	mailList *misc.MailList
 }
 
 // Create a new profile service
-func NewProfileService(db *sql.DB) *ProfileService {
-	return &ProfileService{model: &model.Model{Db: db}}
+func NewProfileService(db *sql.DB, mailList *misc.MailList) *ProfileService {
+	return &ProfileService{model: &model.Model{Db: db}, mailList: mailList}
 }
 
 // Upsert a user
@@ -24,6 +26,11 @@ func (p *ProfileService) UpsertUser(user *NewUser) (*User, error) {
 
 	if user.Id == nil {
 		rawUser, err = p.model.CreateUser(user.AuthId, user.Name, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
+		if err != nil {
+			return nil, err
+		}
+
+		err = p.mailList.Add(user.Name, user.PersonalEmail)
 	} else {
 		rawUser, err = p.model.UpdateUser(*user.Id, user.Name, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
 	}
