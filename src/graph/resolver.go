@@ -1,8 +1,7 @@
 package graph
 
 import (
-	"log"
-
+	"github.com/glimpzio/backend/misc"
 	"github.com/glimpzio/backend/profile"
 )
 
@@ -11,6 +10,6 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Logger         *log.Logger
+	Logger         *misc.Logger
 	ProfileService *profile.ProfileService
 }

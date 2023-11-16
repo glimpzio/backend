@@ -3,11 +3,11 @@ package auth
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
 	"github.com/coreos/go-oidc"
+	"github.com/glimpzio/backend/misc"
 )
 
 type contextKey string
@@ -62,7 +62,7 @@ func VerifyToken(ctx context.Context, token string, config *Auth0Config) (*Token
 }
 
 // Apply middleware
-func ApplyMiddleware(logger *log.Logger, next http.Handler, config *Auth0Config) http.Handler {
+func ApplyMiddleware(logger *misc.Logger, next http.Handler, config *Auth0Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 

@@ -16,6 +16,8 @@ import (
 func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) (*model.User, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
+		r.Logger.ErrorLog.Println(auth.ErrMissingAuthHeader)
+
 		return nil, auth.ErrMissingAuthHeader
 	}
 
@@ -23,6 +25,8 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 		existingUser, err := r.ProfileService.GetUserById(*input.ID)
 
 		if err == nil && existingUser.AuthId != middleware.Token.AuthId {
+			r.Logger.ErrorLog.Println(auth.ErrNotAuthorized)
+
 			return nil, auth.ErrNotAuthorized
 		}
 	}
@@ -42,8 +46,12 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 		},
 	})
 	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
 		return nil, err
 	}
+
+	r.Logger.InfoLog.Println("upserted user " + user.Id)
 
 	return &model.User{
 		ID:             user.Id,
@@ -64,18 +72,28 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 func (r *mutationResolver) CreateLink(ctx context.Context) (*model.Link, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
+		r.Logger.ErrorLog.Println(auth.ErrMissingAuthHeader)
+
 		return nil, auth.ErrMissingAuthHeader
 	}
 
 	user, err := r.ProfileService.GetUserByAuthId(middleware.Token.AuthId)
 	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
 		return nil, err
 	}
 
+	r.Logger.InfoLog.Println("retrieved data for user " + user.Id)
+
 	link, err := r.ProfileService.CreateLink(user.Id)
 	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
 		return nil, err
 	}
+
+	r.Logger.InfoLog.Println("created link " + link.Id)
 
 	return &model.Link{
 		ID:        link.Id,
@@ -88,14 +106,19 @@ func (r *mutationResolver) CreateLink(ctx context.Context) (*model.Link, error) 
 func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
+		r.Logger.ErrorLog.Println(auth.ErrMissingAuthHeader)
+
 		return nil, auth.ErrMissingAuthHeader
 	}
 
 	user, err := r.ProfileService.GetUserByAuthId(middleware.Token.AuthId)
-
 	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
 		return nil, err
 	}
+
+	r.Logger.InfoLog.Println("retrieved data for user " + user.Id)
 
 	return &model.User{
 		ID:             user.Id,
@@ -116,8 +139,12 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 func (r *queryResolver) Link(ctx context.Context, id string) (*model.Link, error) {
 	link, user, err := r.ProfileService.GetLink(id)
 	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
 		return nil, err
 	}
+
+	r.Logger.InfoLog.Println("retrieved link " + link.Id)
 
 	return &model.Link{
 		ID:        link.Id,

@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"os"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/graph"
+	"github.com/glimpzio/backend/misc"
 	"github.com/glimpzio/backend/profile"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -18,10 +18,10 @@ import (
 const defaultPort = "8080"
 
 func main() {
-	logger := log.New(os.Stdout, "[Gateway] ", log.Ldate|log.Ltime)
+	logger := misc.NewLogger("Gateway", os.Stdout)
 
 	if err := godotenv.Load(); err != nil {
-		logger.Println(err)
+		logger.ErrorLog.Println(err)
 	}
 
 	port := os.Getenv("PORT")
@@ -32,7 +32,7 @@ func main() {
 	databaseUrl := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("postgres", databaseUrl)
 	if err != nil {
-		logger.Fatalln(err)
+		logger.ErrorLog.Fatalln(err)
 	}
 
 	auth0Config := &auth.Auth0Config{
@@ -50,6 +50,6 @@ func main() {
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", auth.ApplyMiddleware(logger, srv, auth0Config))
 
-	logger.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	logger.Fatal(http.ListenAndServe(":"+port, nil))
+	logger.InfoLog.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	logger.ErrorLog.Fatal(http.ListenAndServe(":"+port, nil))
 }
