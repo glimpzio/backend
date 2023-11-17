@@ -64,6 +64,7 @@ func main() {
 
 	// Initialize handlers
 	r := gin.Default()
+	r.Use(misc.GinContextToContextMiddleware())
 	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{Logger: logger, ProfileService: profileService}))
 	r.GET("/", playgroundHandler())
 

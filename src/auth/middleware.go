@@ -64,7 +64,8 @@ func VerifyToken(ctx context.Context, token string, config *Auth0Config) (*Token
 // Apply middleware
 func ApplyMiddleware(logger *misc.Logger, next http.Handler, config *Auth0Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
+		gc, _ := misc.GinContextFromContext(r.Context())
+		authHeader := gc.GetHeader(("Authorization"))
 
 		if authHeader == "" {
 			next.ServeHTTP(w, r)
