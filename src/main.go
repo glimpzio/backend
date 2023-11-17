@@ -2,11 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"net/http"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/gin-gonic/gin"
 	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/graph"
 	"github.com/glimpzio/backend/misc"
@@ -16,6 +16,23 @@ import (
 )
 
 const defaultPort = "8080"
+
+func graphqlHandler(logger *misc.Logger, auth0Config *auth.Auth0Config, resolver *graph.Resolver) gin.HandlerFunc {
+	h := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
+	wrapped := auth.ApplyMiddleware(logger, h, auth0Config)
+
+	return func(c *gin.Context) {
+		wrapped.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+func playgroundHandler() gin.HandlerFunc {
+	h := playground.Handler("GraphQL", "/query")
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
 
 func main() {
 	logger := misc.NewLogger("Gateway", os.Stdout)
@@ -46,11 +63,10 @@ func main() {
 	profileService := profile.NewProfileService(db, mailList)
 
 	// Initialize handlers
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Logger: logger, ProfileService: profileService}}))
-
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", auth.ApplyMiddleware(logger, srv, auth0Config))
+	r := gin.Default()
+	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{Logger: logger, ProfileService: profileService}))
+	r.GET("/", playgroundHandler())
 
 	logger.InfoLog.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	logger.ErrorLog.Fatal(http.ListenAndServe(":"+port, nil))
+	logger.ErrorLog.Fatal(r.Run())
 }
