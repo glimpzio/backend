@@ -5,6 +5,7 @@ import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 
 export class InfraStack extends cdk.NestedStack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -18,9 +19,17 @@ export class InfraStack extends cdk.NestedStack {
 
         const secret = new secretsmanager.Secret(this, "appSecret");
 
+        const taskExecRole = new Role(this, "appTaskExecRole", {
+            assumedBy: new ServicePrincipal("ecs-tasks.amazonaws.com"),
+        });
+
+        taskExecRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonECSTaskExecutionRolePolicy"));
+        secret.grantRead(taskExecRole);
+
         const taskDefinition = new ecs.FargateTaskDefinition(this, "appTaskDefinition", {
             cpu: 256,
             memoryLimitMiB: 512,
+            executionRole: taskExecRole,
         });
 
         taskDefinition.addContainer("appContainer", {
@@ -32,8 +41,6 @@ export class InfraStack extends cdk.NestedStack {
         const cluster = new ecs.Cluster(this, "appCluster", {
             vpc,
         });
-
-        // **** I need to assign permissions here for my container to access secret variables
 
         const fargateService = new ecs.FargateService(this, "appFargateService", {
             cluster,
