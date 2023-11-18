@@ -37,7 +37,9 @@ export class InfraStack extends cdk.NestedStack {
         taskDefinition.addContainer("appContainer", {
             image: ecs.ContainerImage.fromEcrRepository(ecrRepo, "latest"),
             portMappings: [{ containerPort: 8080 }],
-            environment: {},
+            environment: {
+                AWS_SECRET_NAME: secret.secretName,
+            },
         });
 
         const cluster = new ecs.Cluster(this, "appCluster", {
