@@ -22,7 +22,6 @@
         "@aws-cdk/aws-sns-subscriptions:restrictSqsDescryption": true,
         "@aws-cdk/aws-apigateway:disableCloudWatchRole": true,
         "@aws-cdk/core:enablePartitionLiterals": true,
-        "@aws-cdk/core:target-partitions": ["aws", "aws-cn"],
-        "ecrRepo": "arn:aws:ecr:ap-southeast-2:256095793138:repository/glimpz"
+        "@aws-cdk/core:target-partitions": ["aws", "aws-cn"]
     }
 }

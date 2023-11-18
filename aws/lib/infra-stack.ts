@@ -11,7 +11,9 @@ export class InfraStack extends cdk.NestedStack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        const ecrRepo = ecr.Repository.fromRepositoryArn(this, "appEcrRepo", this.node.getContext("ecrRepo"));
+        const ecrRepo = new ecr.Repository(this, "appEcrRepo", {
+            repositoryName: "glimpz",
+        });
 
         const vpc = new ec2.Vpc(this, "appVpc", {
             ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
