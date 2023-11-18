@@ -8,6 +8,7 @@ import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as codebuild from "aws-cdk-lib/aws-codebuild";
 import * as codepipeline from "aws-cdk-lib/aws-codepipeline";
 import * as codepipelineActions from "aws-cdk-lib/aws-codepipeline-actions";
+import * as logs from "aws-cdk-lib/aws-logs";
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 
 export class InfraStack extends cdk.NestedStack {
@@ -44,6 +45,9 @@ export class InfraStack extends cdk.NestedStack {
             environment: {
                 AWS_SECRET_NAME: secret.secretName,
             },
+            logging: ecs.LogDrivers.awsLogs({
+                streamPrefix: "app",
+            }),
         });
 
         const cluster = new ecs.Cluster(this, "appCluster", {
