@@ -1,16 +1,17 @@
 package main
 
 import (
-	"context"
+	// "context"
 	"database/sql"
-	"encoding/json"
+	// "encoding/json"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
+
+	// "github.com/aws/aws-sdk-go-v2/aws"
+	// "github.com/aws/aws-sdk-go-v2/config"
+	// "github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/gin-gonic/gin"
 	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/graph"
@@ -60,26 +61,26 @@ func main() {
 		port = defaultPort
 	}
 
-	// Load environment variables
-	cfg, err := config.LoadDefaultConfig(context.Background())
-	if err != nil {
-		logger.ErrorLog.Fatalln(err)
-	}
+	// // Load environment variables
+	// cfg, err := config.LoadDefaultConfig(context.Background())
+	// if err != nil {
+	// 	logger.ErrorLog.Fatalln(err)
+	// }
 
-	svc := secretsmanager.NewFromConfig(cfg)
-	input := &secretsmanager.GetSecretValueInput{
-		SecretId: aws.String(os.Getenv("AWS_SECRET_NAME")),
-	}
+	// svc := secretsmanager.NewFromConfig(cfg)
+	// input := &secretsmanager.GetSecretValueInput{
+	// 	SecretId: aws.String(os.Getenv("AWS_SECRET_NAME")),
+	// }
 
-	result, err := svc.GetSecretValue(context.Background(), input)
-	if err != nil {
-		logger.ErrorLog.Fatalln(err)
-	}
+	// result, err := svc.GetSecretValue(context.Background(), input)
+	// if err != nil {
+	// 	logger.ErrorLog.Fatalln(err)
+	// }
 
 	environment := &Environment{}
-	if err := json.Unmarshal([]byte(*result.SecretString), environment); err != nil {
-		logger.ErrorLog.Fatalln(err)
-	}
+	// if err := json.Unmarshal([]byte(*result.SecretString), environment); err != nil {
+	// 	logger.ErrorLog.Fatalln(err)
+	// }
 
 	// Initialize services
 	db, err := sql.Open("postgres", environment.DatabaseUrl)

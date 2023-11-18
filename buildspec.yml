@@ -6,7 +6,7 @@ phases:
       - echo Logging in to Amazon ECR...
       - docker login -u AWS -p $(aws ecr get-login-password --region $AWS_DEFAULT_REGION) $ECR_REPO_URI
       - REPOSITORY_URI=$ECR_REPO_URI
-      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7) || $IMAGE_TAG=latest
+      - IMAGE_TAG=latest
       
   build:
     commands:
