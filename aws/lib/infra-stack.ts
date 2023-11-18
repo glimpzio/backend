@@ -4,6 +4,7 @@ import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 
 export class InfraStack extends cdk.NestedStack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -24,7 +25,7 @@ export class InfraStack extends cdk.NestedStack {
 
         taskDefinition.addContainer("appContainer", {
             image: ecs.ContainerImage.fromEcrRepository(ecrRepo, "latest"),
-            portMappings: [{ containerPort: 80 }],
+            portMappings: [{ containerPort: 8080 }],
             environment: {},
         });
 
@@ -42,6 +43,27 @@ export class InfraStack extends cdk.NestedStack {
                     capacityProvider: "FARGATE_SPOT",
                     weight: 1,
                 },
+            ],
+            desiredCount: 1,
+        });
+
+        const loadBalancer = new elbv2.ApplicationLoadBalancer(this, "appLoadBalancer", {
+            vpc,
+            internetFacing: true,
+        });
+
+        const listener = loadBalancer.addListener("appListener", {
+            port: 80,
+            open: true,
+        });
+
+        listener.addTargets("appListenerTargetGroup", {
+            port: 80,
+            targets: [
+                fargateService.loadBalancerTarget({
+                    containerName: "appContainer",
+                    containerPort: 8080,
+                }),
             ],
         });
     }
