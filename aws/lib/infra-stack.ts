@@ -8,6 +8,9 @@ import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as codebuild from "aws-cdk-lib/aws-codebuild";
 import * as codepipeline from "aws-cdk-lib/aws-codepipeline";
 import * as codepipelineActions from "aws-cdk-lib/aws-codepipeline-actions";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import * as targets from "aws-cdk-lib/aws-route53-targets";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 
 export class InfraStack extends cdk.NestedStack {
@@ -15,6 +18,8 @@ export class InfraStack extends cdk.NestedStack {
         super(scope, id, props);
 
         // Define runtime infrastructure
+        const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, "appDomain", { zoneName: this.node.getContext("hostedZoneName"), hostedZoneId: this.node.getContext("hostedZoneId") });
+
         const ecrRepo = new ecr.Repository(this, "appEcrRepo", {
             repositoryName: "glimpz",
         });
@@ -70,9 +75,21 @@ export class InfraStack extends cdk.NestedStack {
             internetFacing: true,
         });
 
+        new route53.ARecord(this, "appLbSubdomainRecord", {
+            zone: hostedZone,
+            target: route53.RecordTarget.fromAlias(new targets.LoadBalancerTarget(loadBalancer)),
+            recordName: this.node.getContext("lbSubdomainName"),
+        });
+
+        const certificate = new acm.DnsValidatedCertificate(this, "myAppCertificate", {
+            domainName: this.node.getContext("lbSubdomainName"),
+            hostedZone: hostedZone,
+        });
+
         const listener = loadBalancer.addListener("appListener", {
-            port: 80,
+            port: 443,
             open: true,
+            certificates: [certificate],
         });
 
         listener.addTargets("appListenerTargetGroup", {

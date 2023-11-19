@@ -25,6 +25,9 @@
         "@aws-cdk/core:target-partitions": ["aws", "aws-cn"],
         "githubOwner": "glimpzio",
         "githubRepo": "backend",
-        "githubBranch": "main"
+        "githubBranch": "main",
+        "hostedZoneName": "glimpz.io",
+        "hostedZoneId": "Z071656330WFSFZAT5XEO",
+        "lbSubdomainName": "api.glimpz.io"
     }
 }
