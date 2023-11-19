@@ -67,7 +67,7 @@ export class InfraStack extends cdk.NestedStack {
                     weight: 1,
                 },
             ],
-            desiredCount: 1,
+            desiredCount: this.node.getContext("desiredCount"),
         });
 
         const loadBalancer = new elbv2.ApplicationLoadBalancer(this, "appLoadBalancer", {
