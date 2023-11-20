@@ -20,19 +20,24 @@ func NewProfileService(db *sql.DB, mailList *misc.MailList) *ProfileService {
 }
 
 // Upsert a user
-func (p *ProfileService) UpsertUser(user *NewUser) (*User, error) {
+func (p *ProfileService) UpsertUser(authId string, user *NewUser) (*User, error) {
 	var rawUser *model.User
 	var err error
 
-	if user.Id == nil {
-		rawUser, err = p.model.CreateUser(user.AuthId, user.Name, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
+	existing, err := p.model.GetUserByAuthId(authId)
+	if err != nil {
+		return nil, err
+	}
+
+	if existing == nil {
+		rawUser, err = p.model.CreateUser(authId, user.FirstName, user.LastName, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
 		if err != nil {
 			return nil, err
 		}
 
-		err = p.mailList.Add(user.Name, user.PersonalEmail)
+		err = p.mailList.AddAccount(user.PersonalEmail, user.FirstName, user.LastName)
 	} else {
-		rawUser, err = p.model.UpdateUser(*user.Id, user.Name, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
+		rawUser, err = p.model.UpdateUser(existing.Id, user.FirstName, user.LastName, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.Linkedin)
 	}
 
 	if err != nil {
@@ -42,7 +47,8 @@ func (p *ProfileService) UpsertUser(user *NewUser) (*User, error) {
 	return &User{
 		Id:             rawUser.Id,
 		AuthId:         rawUser.AuthId,
-		Name:           rawUser.Name,
+		FirstName:      rawUser.FirstName,
+		LastName:       rawUser.LastName,
 		Email:          rawUser.PersonalEmail,
 		Bio:            rawUser.Bio,
 		ProfilePicture: user.ProfilePicture,
@@ -66,7 +72,8 @@ func (p *ProfileService) GetUserById(id string) (*User, error) {
 	return &User{
 		Id:             rawUser.Id,
 		AuthId:         rawUser.AuthId,
-		Name:           rawUser.Name,
+		FirstName:      rawUser.FirstName,
+		LastName:       rawUser.LastName,
 		Email:          rawUser.PersonalEmail,
 		Bio:            rawUser.Bio,
 		ProfilePicture: rawUser.ProfilePicture,
@@ -90,7 +97,8 @@ func (p *ProfileService) GetUserByAuthId(authId string) (*User, error) {
 	return &User{
 		Id:             rawUser.Id,
 		AuthId:         rawUser.AuthId,
-		Name:           rawUser.Name,
+		FirstName:      rawUser.FirstName,
+		LastName:       rawUser.LastName,
 		Email:          rawUser.PersonalEmail,
 		Bio:            rawUser.Bio,
 		ProfilePicture: rawUser.ProfilePicture,
@@ -103,46 +111,47 @@ func (p *ProfileService) GetUserByAuthId(authId string) (*User, error) {
 	}, nil
 }
 
-// Create a new link
-func (p *ProfileService) CreateLink(userId string) (*Link, error) {
+// Create a new invite
+func (p *ProfileService) CreateInvite(userId string) (*Invite, error) {
 	expiresAt := time.Time.Add(time.Now(), time.Duration(time.Duration.Hours(24)))
 
-	rawLink, err := p.model.CreateLink(userId, expiresAt)
+	rawInvite, err := p.model.CreateInvite(userId, expiresAt)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Link{
-		Id:        rawLink.Id,
-		UserId:    rawLink.UserId,
-		ExpiresAt: rawLink.ExpiresAt,
+	return &Invite{
+		Id:        rawInvite.Id,
+		UserId:    rawInvite.UserId,
+		ExpiresAt: rawInvite.ExpiresAt,
 	}, nil
 }
 
-// Get a link
-func (p *ProfileService) GetLink(id string) (*Link, *User, error) {
-	rawLink, err := p.model.GetLink(id)
+// Get an invite
+func (p *ProfileService) GetInvite(id string) (*Invite, *User, error) {
+	rawInvite, err := p.model.GetInvite(id)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if rawLink.ExpiresAt.Compare(time.Now()) < 0 {
-		return nil, nil, errors.New("link has expired")
+	if rawInvite.ExpiresAt.Compare(time.Now()) < 0 {
+		return nil, nil, errors.New("invite has expired")
 	}
 
-	rawUser, err := p.model.GetUserById(rawLink.UserId)
+	rawUser, err := p.model.GetUserById(rawInvite.UserId)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return &Link{
-			Id:        rawLink.Id,
-			UserId:    rawLink.UserId,
-			ExpiresAt: rawLink.ExpiresAt,
+	return &Invite{
+			Id:        rawInvite.Id,
+			UserId:    rawInvite.UserId,
+			ExpiresAt: rawInvite.ExpiresAt,
 		}, &User{
 			Id:             rawUser.Id,
 			AuthId:         rawUser.AuthId,
-			Name:           rawUser.Name,
+			FirstName:      rawUser.FirstName,
+			LastName:       rawUser.LastName,
 			Email:          rawUser.PersonalEmail,
 			Bio:            rawUser.Bio,
 			ProfilePicture: rawUser.ProfilePicture,

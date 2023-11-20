@@ -4,7 +4,8 @@
 
 type User {
     id: ID!
-    name: String!
+    firstName: String!
+    lastName: String!
     email: String!
     bio: String!
     profilePicture: String
@@ -19,13 +20,14 @@ type Profile {
 }
 
 type PublicProfile {
-    name: String!
+    firstName: String!
+    lastName: String!
     bio: String!
     profilePicture: String
     profile: Profile!
 }
 
-type Link {
+type Invite {
     id: ID!
     userId: ID!
     expiresAt: Int!
@@ -34,7 +36,7 @@ type Link {
 
 type Query {
     user: User!
-    link(id: ID!): Link!
+    invite(id: ID!): Invite!
 }
 
 input NewProfile {
@@ -45,8 +47,8 @@ input NewProfile {
 }
 
 input NewUser {
-    id: ID
-    name: String!
+    firstName: String!
+    lastName: String!
     email: String!
     bio: String!
     profilePicture: String
@@ -55,5 +57,5 @@ input NewUser {
 
 type Mutation {
   upsertUser(input: NewUser!): User!
-  createLink: Link!
+  createInvite: Invite!
 }

@@ -3,9 +3,8 @@ package profile
 import "time"
 
 type NewUser struct {
-	Id             *string  `json:"id,omitempty"`
-	AuthId         string   `json:"authId"`
-	Name           string   `json:"name"`
+	FirstName      string   `json:"firstName"`
+	LastName       string   `json:"lastName"`
 	PersonalEmail  string   `json:"personalEmail"`
 	Bio            string   `json:"bio"`
 	ProfilePicture *string  `json:"profilePicture,omitempty"`
@@ -22,14 +21,15 @@ type Profile struct {
 type User struct {
 	Id             string   `json:"id"`
 	AuthId         string   `json:"authId"`
-	Name           string   `json:"name"`
+	FirstName      string   `json:"firstName"`
+	LastName       string   `json:"lastName"`
 	Email          string   `json:"email"`
 	Bio            string   `json:"bio"`
 	ProfilePicture *string  `json:"profilePicture,omitempty"`
 	Profile        *Profile `json:"profile"`
 }
 
-type Link struct {
+type Invite struct {
 	Id        string    `json:"id"`
 	UserId    string    `json:"userId"`
 	ExpiresAt time.Time `json:"expiresAt"`

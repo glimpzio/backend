@@ -5,7 +5,8 @@ import "time"
 type User struct {
 	Id             string  `json:"id"`
 	AuthId         string  `json:"authId"`
-	Name           string  `json:"name"`
+	FirstName      string  `json:"firstName"`
+	LastName       string  `json:"lastName"`
 	PersonalEmail  string  `json:"personalEmail"`
 	Bio            string  `json:"bio"`
 	ProfilePicture *string `json:"profilePicture,omitempty"`
@@ -15,7 +16,7 @@ type User struct {
 	LinkedIn       *string `json:"linkedin,omitempty"`
 }
 
-type Link struct {
+type Invite struct {
 	Id        string    `json:"id"`
 	UserId    string    `json:"userId"`
 	ExpiresAt time.Time `json:"expiresAt"`

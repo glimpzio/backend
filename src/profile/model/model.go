@@ -10,7 +10,7 @@ type Model struct {
 }
 
 // Create a new user
-func (m *Model) CreateUser(authId string, name string, personalEmail string, bio string, profilePicture *string, email *string, phone *string, website *string, linkedin *string) (*User, error) {
+func (m *Model) CreateUser(authId string, firstName string, lastName string, personalEmail string, bio string, profilePicture *string, email *string, phone *string, website *string, linkedin *string) (*User, error) {
 	user := &User{}
 
 	tx, err := m.Db.Begin()
@@ -19,8 +19,8 @@ func (m *Model) CreateUser(authId string, name string, personalEmail string, bio
 		return nil, err
 	}
 
-	err = tx.QueryRow("SELECT id, auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin FROM users WHERE auth_id = $1", authId).
-		Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
+	err = tx.QueryRow("SELECT id, auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin FROM users WHERE auth_id = $1", authId).
+		Scan(&user.Id, &user.AuthId, &user.FirstName, &user.LastName, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
 	if err != sql.ErrNoRows {
 		if err != nil {
 			tx.Rollback()
@@ -32,8 +32,8 @@ func (m *Model) CreateUser(authId string, name string, personalEmail string, bio
 		return user, nil
 	}
 
-	err = tx.QueryRow("INSERT INTO users (auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin", authId, name, personalEmail, bio, profilePicture, email, phone, website, linkedin).
-		Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
+	err = tx.QueryRow("INSERT INTO users (auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin", authId, firstName, lastName, personalEmail, bio, profilePicture, email, phone, website, linkedin).
+		Scan(&user.Id, &user.AuthId, &user.FirstName, &user.LastName, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
 	if err != nil {
 		return nil, err
 	}
@@ -47,11 +47,11 @@ func (m *Model) CreateUser(authId string, name string, personalEmail string, bio
 }
 
 // Update a user
-func (m *Model) UpdateUser(id string, name string, personalEmail string, bio string, profilePicture *string, email *string, phone *string, website *string, linkedin *string) (*User, error) {
+func (m *Model) UpdateUser(id string, firstName string, lastName string, personalEmail string, bio string, profilePicture *string, email *string, phone *string, website *string, linkedin *string) (*User, error) {
 	user := &User{}
 
-	err := m.Db.QueryRow("UPDATE users SET name = $1, personal_email = $2, bio = $3, profile_picture = $4, email = $5, phone = $6, website = $7, linkedin = $8 WHERE id = $9 RETURNING id, auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin", name, personalEmail, bio, profilePicture, email, phone, website, linkedin, id).
-		Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
+	err := m.Db.QueryRow("UPDATE users SET first_name = $1, last_name= $2, personal_email = $3, bio = $4, profile_picture = $5, email = $6, phone = $7, website = $8, linkedin = $9 WHERE id = $10 RETURNING id, auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin", firstName, lastName, personalEmail, bio, profilePicture, email, phone, website, linkedin, id).
+		Scan(&user.Id, &user.AuthId, &user.FirstName, &user.LastName, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
 	if err != nil {
 		return nil, err
 	}
@@ -63,9 +63,13 @@ func (m *Model) UpdateUser(id string, name string, personalEmail string, bio str
 func (m *Model) GetUserById(id string) (*User, error) {
 	user := &User{}
 
-	err := m.Db.QueryRow("SELECT id, auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin FROM users WHERE id = $1", id).
-		Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
+	err := m.Db.QueryRow("SELECT id, auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin FROM users WHERE id = $1", id).
+		Scan(&user.Id, &user.AuthId, &user.FirstName, &user.LastName, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
@@ -76,37 +80,45 @@ func (m *Model) GetUserById(id string) (*User, error) {
 func (m *Model) GetUserByAuthId(authId string) (*User, error) {
 	user := &User{}
 
-	err := m.Db.QueryRow("SELECT id, auth_id, name, personal_email, bio, profile_picture, email, phone, website, linkedin FROM users WHERE auth_id = $1", authId).
-		Scan(&user.Id, &user.AuthId, &user.Name, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
+	err := m.Db.QueryRow("SELECT id, auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin FROM users WHERE auth_id = $1", authId).
+		Scan(&user.Id, &user.AuthId, &user.FirstName, &user.LastName, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
 	return user, nil
 }
 
-// Create a new link
-func (m *Model) CreateLink(userId string, expiresAt time.Time) (*Link, error) {
-	link := &Link{}
+// Create a new invite
+func (m *Model) CreateInvite(userId string, expiresAt time.Time) (*Invite, error) {
+	invite := &Invite{}
 
-	err := m.Db.QueryRow("INSERT INTO links (user_id, expires_at) VALUES ($1, $2) RETURNING id, user_id, expires_at", userId, expiresAt).
-		Scan(&link.Id, &link.UserId, &link.ExpiresAt)
+	err := m.Db.QueryRow("INSERT INTO invites (user_id, expires_at) VALUES ($1, $2) RETURNING id, user_id, expires_at", userId, expiresAt).
+		Scan(&invite.Id, &invite.UserId, &invite.ExpiresAt)
 	if err != nil {
 		return nil, err
 	}
 
-	return link, nil
+	return invite, nil
 }
 
-// Get a new link
-func (m *Model) GetLink(id string) (*Link, error) {
-	link := &Link{}
+// Get an invite
+func (m *Model) GetInvite(id string) (*Invite, error) {
+	invite := &Invite{}
 
-	err := m.Db.QueryRow("SELECT id, user_id, expires_at FROM links WHERE id = $1", id).
-		Scan(&link.Id, &link.UserId, &link.ExpiresAt)
+	err := m.Db.QueryRow("SELECT id, user_id, expires_at FROM invites WHERE id = $1", id).
+		Scan(&invite.Id, &invite.UserId, &invite.ExpiresAt)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
-	return link, nil
+	return invite, nil
 }

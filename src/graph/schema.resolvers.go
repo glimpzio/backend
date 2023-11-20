@@ -21,20 +21,9 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 		return nil, auth.ErrMissingAuthHeader
 	}
 
-	if input.ID != nil {
-		existingUser, err := r.ProfileService.GetUserById(*input.ID)
-
-		if err == nil && existingUser.AuthId != middleware.Token.AuthId {
-			r.Logger.ErrorLog.Println(auth.ErrNotAuthorized)
-
-			return nil, auth.ErrNotAuthorized
-		}
-	}
-
-	user, err := r.ProfileService.UpsertUser(&profile.NewUser{
-		Id:             input.ID,
-		AuthId:         middleware.Token.AuthId,
-		Name:           input.Name,
+	user, err := r.ProfileService.UpsertUser(middleware.Token.AuthId, &profile.NewUser{
+		FirstName:      input.FirstName,
+		LastName:       input.LastName,
 		PersonalEmail:  input.Email,
 		Bio:            input.Bio,
 		ProfilePicture: input.ProfilePicture,
@@ -55,7 +44,8 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 
 	return &model.User{
 		ID:             user.Id,
-		Name:           user.Name,
+		FirstName:      user.FirstName,
+		LastName:       user.LastName,
 		Email:          user.Email,
 		Bio:            user.Bio,
 		ProfilePicture: user.ProfilePicture,
@@ -68,8 +58,8 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 	}, nil
 }
 
-// CreateLink is the resolver for the createLink field.
-func (r *mutationResolver) CreateLink(ctx context.Context) (*model.Link, error) {
+// CreateInvite is the resolver for the createInvite field.
+func (r *mutationResolver) CreateInvite(ctx context.Context) (*model.Invite, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
 		r.Logger.ErrorLog.Println(auth.ErrMissingAuthHeader)
@@ -86,19 +76,31 @@ func (r *mutationResolver) CreateLink(ctx context.Context) (*model.Link, error) 
 
 	r.Logger.InfoLog.Println("retrieved data for user " + user.Id)
 
-	link, err := r.ProfileService.CreateLink(user.Id)
+	invite, err := r.ProfileService.CreateInvite(user.Id)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
 		return nil, err
 	}
 
-	r.Logger.InfoLog.Println("created link " + link.Id)
+	r.Logger.InfoLog.Println("created invite " + invite.Id)
 
-	return &model.Link{
-		ID:        link.Id,
-		UserID:    link.UserId,
-		ExpiresAt: int(link.ExpiresAt.Unix()),
+	return &model.Invite{
+		ID:        invite.Id,
+		UserID:    invite.UserId,
+		ExpiresAt: int(invite.ExpiresAt.Unix()),
+		PublicProfile: &model.PublicProfile{
+			FirstName:      user.FirstName,
+			LastName:       user.LastName,
+			Bio:            user.Bio,
+			ProfilePicture: user.ProfilePicture,
+			Profile: &model.Profile{
+				Email:    user.Profile.Email,
+				Phone:    user.Profile.Phone,
+				Website:  user.Profile.Website,
+				Linkedin: user.Profile.Linkedin,
+			},
+		},
 	}, nil
 }
 
@@ -122,7 +124,8 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 
 	return &model.User{
 		ID:             user.Id,
-		Name:           user.Name,
+		FirstName:      user.FirstName,
+		LastName:       user.LastName,
 		Email:          user.Email,
 		Bio:            user.Bio,
 		ProfilePicture: user.ProfilePicture,
@@ -135,23 +138,24 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	}, nil
 }
 
-// Link is the resolver for the link field.
-func (r *queryResolver) Link(ctx context.Context, id string) (*model.Link, error) {
-	link, user, err := r.ProfileService.GetLink(id)
+// Invite is the resolver for the invite field.
+func (r *queryResolver) Invite(ctx context.Context, id string) (*model.Invite, error) {
+	invite, user, err := r.ProfileService.GetInvite(id)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
 		return nil, err
 	}
 
-	r.Logger.InfoLog.Println("retrieved link " + link.Id)
+	r.Logger.InfoLog.Println("retrieved invite " + invite.Id)
 
-	return &model.Link{
-		ID:        link.Id,
-		UserID:    link.UserId,
-		ExpiresAt: int(link.ExpiresAt.Unix()),
+	return &model.Invite{
+		ID:        invite.Id,
+		UserID:    invite.UserId,
+		ExpiresAt: int(invite.ExpiresAt.Unix()),
 		PublicProfile: &model.PublicProfile{
-			Name:           user.Name,
+			FirstName:      user.FirstName,
+			LastName:       user.LastName,
 			Bio:            user.Bio,
 			ProfilePicture: user.ProfilePicture,
 			Profile: &model.Profile{

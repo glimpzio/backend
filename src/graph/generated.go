@@ -47,7 +47,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Link struct {
+	Invite struct {
 		ExpiresAt     func(childComplexity int) int
 		ID            func(childComplexity int) int
 		PublicProfile func(childComplexity int) int
@@ -55,8 +55,8 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateLink func(childComplexity int) int
-		UpsertUser func(childComplexity int, input model.NewUser) int
+		CreateInvite func(childComplexity int) int
+		UpsertUser   func(childComplexity int, input model.NewUser) int
 	}
 
 	Profile struct {
@@ -68,21 +68,23 @@ type ComplexityRoot struct {
 
 	PublicProfile struct {
 		Bio            func(childComplexity int) int
-		Name           func(childComplexity int) int
+		FirstName      func(childComplexity int) int
+		LastName       func(childComplexity int) int
 		Profile        func(childComplexity int) int
 		ProfilePicture func(childComplexity int) int
 	}
 
 	Query struct {
-		Link func(childComplexity int, id string) int
-		User func(childComplexity int) int
+		Invite func(childComplexity int, id string) int
+		User   func(childComplexity int) int
 	}
 
 	User struct {
 		Bio            func(childComplexity int) int
 		Email          func(childComplexity int) int
+		FirstName      func(childComplexity int) int
 		ID             func(childComplexity int) int
-		Name           func(childComplexity int) int
+		LastName       func(childComplexity int) int
 		Profile        func(childComplexity int) int
 		ProfilePicture func(childComplexity int) int
 	}
@@ -90,11 +92,11 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	UpsertUser(ctx context.Context, input model.NewUser) (*model.User, error)
-	CreateLink(ctx context.Context) (*model.Link, error)
+	CreateInvite(ctx context.Context) (*model.Invite, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context) (*model.User, error)
-	Link(ctx context.Context, id string) (*model.Link, error)
+	Invite(ctx context.Context, id string) (*model.Invite, error)
 }
 
 type executableSchema struct {
@@ -116,40 +118,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Link.expiresAt":
-		if e.complexity.Link.ExpiresAt == nil {
+	case "Invite.expiresAt":
+		if e.complexity.Invite.ExpiresAt == nil {
 			break
 		}
 
-		return e.complexity.Link.ExpiresAt(childComplexity), true
+		return e.complexity.Invite.ExpiresAt(childComplexity), true
 
-	case "Link.id":
-		if e.complexity.Link.ID == nil {
+	case "Invite.id":
+		if e.complexity.Invite.ID == nil {
 			break
 		}
 
-		return e.complexity.Link.ID(childComplexity), true
+		return e.complexity.Invite.ID(childComplexity), true
 
-	case "Link.publicProfile":
-		if e.complexity.Link.PublicProfile == nil {
+	case "Invite.publicProfile":
+		if e.complexity.Invite.PublicProfile == nil {
 			break
 		}
 
-		return e.complexity.Link.PublicProfile(childComplexity), true
+		return e.complexity.Invite.PublicProfile(childComplexity), true
 
-	case "Link.userId":
-		if e.complexity.Link.UserID == nil {
+	case "Invite.userId":
+		if e.complexity.Invite.UserID == nil {
 			break
 		}
 
-		return e.complexity.Link.UserID(childComplexity), true
+		return e.complexity.Invite.UserID(childComplexity), true
 
-	case "Mutation.createLink":
-		if e.complexity.Mutation.CreateLink == nil {
+	case "Mutation.createInvite":
+		if e.complexity.Mutation.CreateInvite == nil {
 			break
 		}
 
-		return e.complexity.Mutation.CreateLink(childComplexity), true
+		return e.complexity.Mutation.CreateInvite(childComplexity), true
 
 	case "Mutation.upsertUser":
 		if e.complexity.Mutation.UpsertUser == nil {
@@ -198,12 +200,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PublicProfile.Bio(childComplexity), true
 
-	case "PublicProfile.name":
-		if e.complexity.PublicProfile.Name == nil {
+	case "PublicProfile.firstName":
+		if e.complexity.PublicProfile.FirstName == nil {
 			break
 		}
 
-		return e.complexity.PublicProfile.Name(childComplexity), true
+		return e.complexity.PublicProfile.FirstName(childComplexity), true
+
+	case "PublicProfile.lastName":
+		if e.complexity.PublicProfile.LastName == nil {
+			break
+		}
+
+		return e.complexity.PublicProfile.LastName(childComplexity), true
 
 	case "PublicProfile.profile":
 		if e.complexity.PublicProfile.Profile == nil {
@@ -219,17 +228,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PublicProfile.ProfilePicture(childComplexity), true
 
-	case "Query.link":
-		if e.complexity.Query.Link == nil {
+	case "Query.invite":
+		if e.complexity.Query.Invite == nil {
 			break
 		}
 
-		args, err := ec.field_Query_link_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_invite_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Link(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.Invite(childComplexity, args["id"].(string)), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -252,6 +261,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Email(childComplexity), true
 
+	case "User.firstName":
+		if e.complexity.User.FirstName == nil {
+			break
+		}
+
+		return e.complexity.User.FirstName(childComplexity), true
+
 	case "User.id":
 		if e.complexity.User.ID == nil {
 			break
@@ -259,12 +275,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.ID(childComplexity), true
 
-	case "User.name":
-		if e.complexity.User.Name == nil {
+	case "User.lastName":
+		if e.complexity.User.LastName == nil {
 			break
 		}
 
-		return e.complexity.User.Name(childComplexity), true
+		return e.complexity.User.LastName(childComplexity), true
 
 	case "User.profile":
 		if e.complexity.User.Profile == nil {
@@ -436,7 +452,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_link_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_invite_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -489,8 +505,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Link_id(ctx context.Context, field graphql.CollectedField, obj *model.Link) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Link_id(ctx, field)
+func (ec *executionContext) _Invite_id(ctx context.Context, field graphql.CollectedField, obj *model.Invite) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Invite_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -520,9 +536,9 @@ func (ec *executionContext) _Link_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Link_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Invite_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Link",
+		Object:     "Invite",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -533,8 +549,8 @@ func (ec *executionContext) fieldContext_Link_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _Link_userId(ctx context.Context, field graphql.CollectedField, obj *model.Link) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Link_userId(ctx, field)
+func (ec *executionContext) _Invite_userId(ctx context.Context, field graphql.CollectedField, obj *model.Invite) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Invite_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -564,9 +580,9 @@ func (ec *executionContext) _Link_userId(ctx context.Context, field graphql.Coll
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Link_userId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Invite_userId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Link",
+		Object:     "Invite",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -577,8 +593,8 @@ func (ec *executionContext) fieldContext_Link_userId(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Link_expiresAt(ctx context.Context, field graphql.CollectedField, obj *model.Link) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Link_expiresAt(ctx, field)
+func (ec *executionContext) _Invite_expiresAt(ctx context.Context, field graphql.CollectedField, obj *model.Invite) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Invite_expiresAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -608,9 +624,9 @@ func (ec *executionContext) _Link_expiresAt(ctx context.Context, field graphql.C
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Link_expiresAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Invite_expiresAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Link",
+		Object:     "Invite",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -621,8 +637,8 @@ func (ec *executionContext) fieldContext_Link_expiresAt(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Link_publicProfile(ctx context.Context, field graphql.CollectedField, obj *model.Link) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Link_publicProfile(ctx, field)
+func (ec *executionContext) _Invite_publicProfile(ctx context.Context, field graphql.CollectedField, obj *model.Invite) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Invite_publicProfile(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -652,16 +668,18 @@ func (ec *executionContext) _Link_publicProfile(ctx context.Context, field graph
 	return ec.marshalNPublicProfile2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐPublicProfile(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Link_publicProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Invite_publicProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Link",
+		Object:     "Invite",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "name":
-				return ec.fieldContext_PublicProfile_name(ctx, field)
+			case "firstName":
+				return ec.fieldContext_PublicProfile_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_PublicProfile_lastName(ctx, field)
 			case "bio":
 				return ec.fieldContext_PublicProfile_bio(ctx, field)
 			case "profilePicture":
@@ -716,8 +734,10 @@ func (ec *executionContext) fieldContext_Mutation_upsertUser(ctx context.Context
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
-			case "name":
-				return ec.fieldContext_User_name(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
 			case "email":
 				return ec.fieldContext_User_email(ctx, field)
 			case "bio":
@@ -744,8 +764,8 @@ func (ec *executionContext) fieldContext_Mutation_upsertUser(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_createLink(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createLink(ctx, field)
+func (ec *executionContext) _Mutation_createInvite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createInvite(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -758,7 +778,7 @@ func (ec *executionContext) _Mutation_createLink(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateLink(rctx)
+		return ec.resolvers.Mutation().CreateInvite(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -770,12 +790,12 @@ func (ec *executionContext) _Mutation_createLink(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Link)
+	res := resTmp.(*model.Invite)
 	fc.Result = res
-	return ec.marshalNLink2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐLink(ctx, field.Selections, res)
+	return ec.marshalNInvite2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_createLink(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_createInvite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -784,15 +804,15 @@ func (ec *executionContext) fieldContext_Mutation_createLink(ctx context.Context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Link_id(ctx, field)
+				return ec.fieldContext_Invite_id(ctx, field)
 			case "userId":
-				return ec.fieldContext_Link_userId(ctx, field)
+				return ec.fieldContext_Invite_userId(ctx, field)
 			case "expiresAt":
-				return ec.fieldContext_Link_expiresAt(ctx, field)
+				return ec.fieldContext_Invite_expiresAt(ctx, field)
 			case "publicProfile":
-				return ec.fieldContext_Link_publicProfile(ctx, field)
+				return ec.fieldContext_Invite_publicProfile(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Link", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Invite", field.Name)
 		},
 	}
 	return fc, nil
@@ -962,8 +982,8 @@ func (ec *executionContext) fieldContext_Profile_linkedin(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _PublicProfile_name(ctx context.Context, field graphql.CollectedField, obj *model.PublicProfile) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PublicProfile_name(ctx, field)
+func (ec *executionContext) _PublicProfile_firstName(ctx context.Context, field graphql.CollectedField, obj *model.PublicProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PublicProfile_firstName(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -976,7 +996,7 @@ func (ec *executionContext) _PublicProfile_name(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return obj.FirstName, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -993,7 +1013,51 @@ func (ec *executionContext) _PublicProfile_name(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PublicProfile_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PublicProfile_firstName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PublicProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PublicProfile_lastName(ctx context.Context, field graphql.CollectedField, obj *model.PublicProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PublicProfile_lastName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PublicProfile_lastName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PublicProfile",
 		Field:      field,
@@ -1186,8 +1250,10 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
-			case "name":
-				return ec.fieldContext_User_name(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
 			case "email":
 				return ec.fieldContext_User_email(ctx, field)
 			case "bio":
@@ -1203,8 +1269,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_link(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_link(ctx, field)
+func (ec *executionContext) _Query_invite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_invite(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1217,7 +1283,7 @@ func (ec *executionContext) _Query_link(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Link(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Query().Invite(rctx, fc.Args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1229,12 +1295,12 @@ func (ec *executionContext) _Query_link(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Link)
+	res := resTmp.(*model.Invite)
 	fc.Result = res
-	return ec.marshalNLink2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐLink(ctx, field.Selections, res)
+	return ec.marshalNInvite2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_link(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_invite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1243,15 +1309,15 @@ func (ec *executionContext) fieldContext_Query_link(ctx context.Context, field g
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Link_id(ctx, field)
+				return ec.fieldContext_Invite_id(ctx, field)
 			case "userId":
-				return ec.fieldContext_Link_userId(ctx, field)
+				return ec.fieldContext_Invite_userId(ctx, field)
 			case "expiresAt":
-				return ec.fieldContext_Link_expiresAt(ctx, field)
+				return ec.fieldContext_Invite_expiresAt(ctx, field)
 			case "publicProfile":
-				return ec.fieldContext_Link_publicProfile(ctx, field)
+				return ec.fieldContext_Invite_publicProfile(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Link", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Invite", field.Name)
 		},
 	}
 	defer func() {
@@ -1261,7 +1327,7 @@ func (ec *executionContext) fieldContext_Query_link(ctx context.Context, field g
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_link_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_invite_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1441,8 +1507,8 @@ func (ec *executionContext) fieldContext_User_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_name(ctx, field)
+func (ec *executionContext) _User_firstName(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_firstName(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1455,7 +1521,7 @@ func (ec *executionContext) _User_name(ctx context.Context, field graphql.Collec
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return obj.FirstName, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1472,7 +1538,51 @@ func (ec *executionContext) _User_name(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_firstName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_lastName(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_lastName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_lastName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -3504,31 +3614,31 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj inter
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "email", "bio", "profilePicture", "profile"}
+	fieldsInOrder := [...]string{"firstName", "lastName", "email", "bio", "profilePicture", "profile"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "id":
+		case "firstName":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Name = data
+			it.FirstName = data
+		case "lastName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.LastName = data
 		case "email":
 			var err error
 
@@ -3579,34 +3689,34 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj inter
 
 // region    **************************** object.gotpl ****************************
 
-var linkImplementors = []string{"Link"}
+var inviteImplementors = []string{"Invite"}
 
-func (ec *executionContext) _Link(ctx context.Context, sel ast.SelectionSet, obj *model.Link) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, linkImplementors)
+func (ec *executionContext) _Invite(ctx context.Context, sel ast.SelectionSet, obj *model.Invite) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, inviteImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Link")
+			out.Values[i] = graphql.MarshalString("Invite")
 		case "id":
-			out.Values[i] = ec._Link_id(ctx, field, obj)
+			out.Values[i] = ec._Invite_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "userId":
-			out.Values[i] = ec._Link_userId(ctx, field, obj)
+			out.Values[i] = ec._Invite_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "expiresAt":
-			out.Values[i] = ec._Link_expiresAt(ctx, field, obj)
+			out.Values[i] = ec._Invite_expiresAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "publicProfile":
-			out.Values[i] = ec._Link_publicProfile(ctx, field, obj)
+			out.Values[i] = ec._Invite_publicProfile(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3659,9 +3769,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "createLink":
+		case "createInvite":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createLink(ctx, field)
+				return ec._Mutation_createInvite(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -3742,8 +3852,13 @@ func (ec *executionContext) _PublicProfile(ctx context.Context, sel ast.Selectio
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PublicProfile")
-		case "name":
-			out.Values[i] = ec._PublicProfile_name(ctx, field, obj)
+		case "firstName":
+			out.Values[i] = ec._PublicProfile_firstName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lastName":
+			out.Values[i] = ec._PublicProfile_lastName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3823,7 +3938,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "link":
+		case "invite":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3832,7 +3947,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_link(ctx, field)
+				res = ec._Query_invite(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -3892,8 +4007,13 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "name":
-			out.Values[i] = ec._User_name(ctx, field, obj)
+		case "firstName":
+			out.Values[i] = ec._User_firstName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lastName":
+			out.Values[i] = ec._User_lastName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4308,18 +4428,18 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNLink2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐLink(ctx context.Context, sel ast.SelectionSet, v model.Link) graphql.Marshaler {
-	return ec._Link(ctx, sel, &v)
+func (ec *executionContext) marshalNInvite2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐInvite(ctx context.Context, sel ast.SelectionSet, v model.Invite) graphql.Marshaler {
+	return ec._Invite(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNLink2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐLink(ctx context.Context, sel ast.SelectionSet, v *model.Link) graphql.Marshaler {
+func (ec *executionContext) marshalNInvite2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐInvite(ctx context.Context, sel ast.SelectionSet, v *model.Invite) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._Link(ctx, sel, v)
+	return ec._Invite(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNNewProfile2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐNewProfile(ctx context.Context, v interface{}) (*model.NewProfile, error) {
@@ -4657,22 +4777,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	res := graphql.MarshalBoolean(*v)
-	return res
-}
-
-func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalID(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalID(*v)
 	return res
 }
 

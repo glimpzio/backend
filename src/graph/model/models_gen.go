@@ -2,7 +2,7 @@
 
 package model
 
-type Link struct {
+type Invite struct {
 	ID            string         `json:"id"`
 	UserID        string         `json:"userId"`
 	ExpiresAt     int            `json:"expiresAt"`
@@ -17,8 +17,8 @@ type NewProfile struct {
 }
 
 type NewUser struct {
-	ID             *string     `json:"id,omitempty"`
-	Name           string      `json:"name"`
+	FirstName      string      `json:"firstName"`
+	LastName       string      `json:"lastName"`
 	Email          string      `json:"email"`
 	Bio            string      `json:"bio"`
 	ProfilePicture *string     `json:"profilePicture,omitempty"`
@@ -33,7 +33,8 @@ type Profile struct {
 }
 
 type PublicProfile struct {
-	Name           string   `json:"name"`
+	FirstName      string   `json:"firstName"`
+	LastName       string   `json:"lastName"`
 	Bio            string   `json:"bio"`
 	ProfilePicture *string  `json:"profilePicture,omitempty"`
 	Profile        *Profile `json:"profile"`
@@ -41,7 +42,8 @@ type PublicProfile struct {
 
 type User struct {
 	ID             string   `json:"id"`
-	Name           string   `json:"name"`
+	FirstName      string   `json:"firstName"`
+	LastName       string   `json:"lastName"`
 	Email          string   `json:"email"`
 	Bio            string   `json:"bio"`
 	ProfilePicture *string  `json:"profilePicture,omitempty"`
