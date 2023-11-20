@@ -30,12 +30,7 @@ export class AwsStack extends cdk.Stack {
             subnetConfiguration: [
                 {
                     cidrMask: 24,
-                    name: "PublicSubnet1",
-                    subnetType: ec2.SubnetType.PUBLIC,
-                },
-                {
-                    cidrMask: 24,
-                    name: "PublicSubnet2",
+                    name: "Public",
                     subnetType: ec2.SubnetType.PUBLIC,
                 },
             ],
