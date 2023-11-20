@@ -47,6 +47,13 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	EmailConnection struct {
+		ConnectedAt func(childComplexity int) int
+		Email       func(childComplexity int) int
+		ID          func(childComplexity int) int
+		UserID      func(childComplexity int) int
+	}
+
 	Invite struct {
 		ExpiresAt     func(childComplexity int) int
 		ID            func(childComplexity int) int
@@ -55,8 +62,9 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateInvite func(childComplexity int) int
-		UpsertUser   func(childComplexity int, input model.NewUser) int
+		ConnectByEmail func(childComplexity int, inviteID string, email string) int
+		CreateInvite   func(childComplexity int) int
+		UpsertUser     func(childComplexity int, input model.NewUser) int
 	}
 
 	Profile struct {
@@ -75,8 +83,9 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Invite func(childComplexity int, id string) int
-		User   func(childComplexity int) int
+		EmailConnections func(childComplexity int) int
+		Invite           func(childComplexity int, id string) int
+		User             func(childComplexity int) int
 	}
 
 	User struct {
@@ -93,10 +102,12 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	UpsertUser(ctx context.Context, input model.NewUser) (*model.User, error)
 	CreateInvite(ctx context.Context) (*model.Invite, error)
+	ConnectByEmail(ctx context.Context, inviteID string, email string) (*model.EmailConnection, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context) (*model.User, error)
 	Invite(ctx context.Context, id string) (*model.Invite, error)
+	EmailConnections(ctx context.Context) ([]*model.EmailConnection, error)
 }
 
 type executableSchema struct {
@@ -117,6 +128,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "EmailConnection.connectedAt":
+		if e.complexity.EmailConnection.ConnectedAt == nil {
+			break
+		}
+
+		return e.complexity.EmailConnection.ConnectedAt(childComplexity), true
+
+	case "EmailConnection.email":
+		if e.complexity.EmailConnection.Email == nil {
+			break
+		}
+
+		return e.complexity.EmailConnection.Email(childComplexity), true
+
+	case "EmailConnection.id":
+		if e.complexity.EmailConnection.ID == nil {
+			break
+		}
+
+		return e.complexity.EmailConnection.ID(childComplexity), true
+
+	case "EmailConnection.userId":
+		if e.complexity.EmailConnection.UserID == nil {
+			break
+		}
+
+		return e.complexity.EmailConnection.UserID(childComplexity), true
 
 	case "Invite.expiresAt":
 		if e.complexity.Invite.ExpiresAt == nil {
@@ -145,6 +184,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Invite.UserID(childComplexity), true
+
+	case "Mutation.connectByEmail":
+		if e.complexity.Mutation.ConnectByEmail == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_connectByEmail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ConnectByEmail(childComplexity, args["inviteId"].(string), args["email"].(string)), true
 
 	case "Mutation.createInvite":
 		if e.complexity.Mutation.CreateInvite == nil {
@@ -227,6 +278,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PublicProfile.ProfilePicture(childComplexity), true
+
+	case "Query.emailConnections":
+		if e.complexity.Query.EmailConnections == nil {
+			break
+		}
+
+		return e.complexity.Query.EmailConnections(childComplexity), true
 
 	case "Query.invite":
 		if e.complexity.Query.Invite == nil {
@@ -422,6 +480,30 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_connectByEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["inviteId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inviteId"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["inviteId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_upsertUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -504,6 +586,182 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _EmailConnection_id(ctx context.Context, field graphql.CollectedField, obj *model.EmailConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EmailConnection_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EmailConnection_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EmailConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EmailConnection_userId(ctx context.Context, field graphql.CollectedField, obj *model.EmailConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EmailConnection_userId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EmailConnection_userId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EmailConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EmailConnection_email(ctx context.Context, field graphql.CollectedField, obj *model.EmailConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EmailConnection_email(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Email, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EmailConnection_email(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EmailConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EmailConnection_connectedAt(ctx context.Context, field graphql.CollectedField, obj *model.EmailConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EmailConnection_connectedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ConnectedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EmailConnection_connectedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EmailConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _Invite_id(ctx context.Context, field graphql.CollectedField, obj *model.Invite) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Invite_id(ctx, field)
@@ -814,6 +1072,71 @@ func (ec *executionContext) fieldContext_Mutation_createInvite(ctx context.Conte
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Invite", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_connectByEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_connectByEmail(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ConnectByEmail(rctx, fc.Args["inviteId"].(string), fc.Args["email"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.EmailConnection)
+	fc.Result = res
+	return ec.marshalNEmailConnection2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐEmailConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_connectByEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EmailConnection_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_EmailConnection_userId(ctx, field)
+			case "email":
+				return ec.fieldContext_EmailConnection_email(ctx, field)
+			case "connectedAt":
+				return ec.fieldContext_EmailConnection_connectedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EmailConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_connectByEmail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -1330,6 +1653,60 @@ func (ec *executionContext) fieldContext_Query_invite(ctx context.Context, field
 	if fc.Args, err = ec.field_Query_invite_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_emailConnections(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_emailConnections(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().EmailConnections(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.EmailConnection)
+	fc.Result = res
+	return ec.marshalNEmailConnection2ᚕᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐEmailConnectionᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_emailConnections(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EmailConnection_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_EmailConnection_userId(ctx, field)
+			case "email":
+				return ec.fieldContext_EmailConnection_email(ctx, field)
+			case "connectedAt":
+				return ec.fieldContext_EmailConnection_connectedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EmailConnection", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -3689,6 +4066,60 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj inter
 
 // region    **************************** object.gotpl ****************************
 
+var emailConnectionImplementors = []string{"EmailConnection"}
+
+func (ec *executionContext) _EmailConnection(ctx context.Context, sel ast.SelectionSet, obj *model.EmailConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, emailConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EmailConnection")
+		case "id":
+			out.Values[i] = ec._EmailConnection_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._EmailConnection_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "email":
+			out.Values[i] = ec._EmailConnection_email(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "connectedAt":
+			out.Values[i] = ec._EmailConnection_connectedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var inviteImplementors = []string{"Invite"}
 
 func (ec *executionContext) _Invite(ctx context.Context, sel ast.SelectionSet, obj *model.Invite) graphql.Marshaler {
@@ -3772,6 +4203,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "createInvite":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createInvite(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "connectByEmail":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_connectByEmail(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -3948,6 +4386,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_invite(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "emailConnections":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_emailConnections(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -4396,6 +4856,64 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNEmailConnection2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐEmailConnection(ctx context.Context, sel ast.SelectionSet, v model.EmailConnection) graphql.Marshaler {
+	return ec._EmailConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEmailConnection2ᚕᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐEmailConnectionᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.EmailConnection) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEmailConnection2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐEmailConnection(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNEmailConnection2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐEmailConnection(ctx context.Context, sel ast.SelectionSet, v *model.EmailConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._EmailConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {

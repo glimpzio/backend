@@ -40,7 +40,7 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 		return nil, err
 	}
 
-	r.Logger.InfoLog.Println("upserted user " + user.Id)
+	r.Logger.InfoLog.Printf("upserted user %s", user.Id)
 
 	return &model.User{
 		ID:             user.Id,
@@ -74,7 +74,7 @@ func (r *mutationResolver) CreateInvite(ctx context.Context) (*model.Invite, err
 		return nil, err
 	}
 
-	r.Logger.InfoLog.Println("retrieved data for user " + user.Id)
+	r.Logger.InfoLog.Printf("retrieved data for user %s", user.Id)
 
 	invite, err := r.ProfileService.CreateInvite(user.Id)
 	if err != nil {
@@ -83,7 +83,7 @@ func (r *mutationResolver) CreateInvite(ctx context.Context) (*model.Invite, err
 		return nil, err
 	}
 
-	r.Logger.InfoLog.Println("created invite " + invite.Id)
+	r.Logger.InfoLog.Printf("created invite %s", invite.Id)
 
 	return &model.Invite{
 		ID:        invite.Id,
@@ -104,6 +104,25 @@ func (r *mutationResolver) CreateInvite(ctx context.Context) (*model.Invite, err
 	}, nil
 }
 
+// ConnectByEmail is the resolver for the connectByEmail field.
+func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, email string) (*model.EmailConnection, error) {
+	emailConnection, err := r.ProfileService.ConnectByEmail(inviteID, email)
+	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
+		return nil, err
+	}
+
+	r.Logger.InfoLog.Printf("connected by email for invite %s", inviteID)
+
+	return &model.EmailConnection{
+		ID:          emailConnection.Id,
+		UserID:      emailConnection.UserId,
+		Email:       emailConnection.Email,
+		ConnectedAt: int(emailConnection.ConnectedAt.Unix()),
+	}, nil
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	middleware := auth.GetMiddleware(ctx)
@@ -120,7 +139,7 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 		return nil, err
 	}
 
-	r.Logger.InfoLog.Println("retrieved data for user " + user.Id)
+	r.Logger.InfoLog.Printf("retrieved data for user %s", user.Id)
 
 	return &model.User{
 		ID:             user.Id,
@@ -147,7 +166,7 @@ func (r *queryResolver) Invite(ctx context.Context, id string) (*model.Invite, e
 		return nil, err
 	}
 
-	r.Logger.InfoLog.Println("retrieved invite " + invite.Id)
+	r.Logger.InfoLog.Printf("retrieved invite %s", invite.Id)
 
 	return &model.Invite{
 		ID:        invite.Id,
@@ -166,6 +185,46 @@ func (r *queryResolver) Invite(ctx context.Context, id string) (*model.Invite, e
 			},
 		},
 	}, nil
+}
+
+// EmailConnections is the resolver for the emailConnections field.
+func (r *queryResolver) EmailConnections(ctx context.Context) ([]*model.EmailConnection, error) {
+	middleware := auth.GetMiddleware(ctx)
+	if middleware.Token == nil {
+		r.Logger.ErrorLog.Println(auth.ErrMissingAuthHeader)
+
+		return nil, auth.ErrMissingAuthHeader
+	}
+
+	user, err := r.ProfileService.GetUserByAuthId(middleware.Token.AuthId)
+	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
+		return nil, err
+	}
+
+	r.Logger.InfoLog.Printf("retrieved data for user %s", user.Id)
+
+	rawEmailConnections, err := r.ProfileService.GetEmailConnections(user.Id)
+	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
+		return nil, err
+	}
+
+	r.Logger.InfoLog.Printf("retrieved email connections for user %s", user.Id)
+
+	emailConnections := []*model.EmailConnection{}
+	for _, rawEmailConnection := range rawEmailConnections {
+		emailConnections = append(emailConnections, &model.EmailConnection{
+			ID:          rawEmailConnection.Id,
+			UserID:      rawEmailConnection.UserId,
+			Email:       rawEmailConnection.Email,
+			ConnectedAt: int(rawEmailConnection.ConnectedAt.Unix()),
+		})
+	}
+
+	return emailConnections, nil
 }
 
 // Mutation returns MutationResolver implementation.

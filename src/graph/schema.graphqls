@@ -34,9 +34,17 @@ type Invite {
     publicProfile: PublicProfile!
 }
 
+type EmailConnection {
+    id: ID!
+    userId: ID!
+    email: String!
+    connectedAt: Int!
+}
+
 type Query {
     user: User!
     invite(id: ID!): Invite!
+    emailConnections: [EmailConnection!]!
 }
 
 input NewProfile {
@@ -58,4 +66,5 @@ input NewUser {
 type Mutation {
   upsertUser(input: NewUser!): User!
   createInvite: Invite!
+  connectByEmail(inviteId: ID!, email: String!): EmailConnection!
 }

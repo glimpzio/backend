@@ -2,6 +2,13 @@
 
 package model
 
+type EmailConnection struct {
+	ID          string `json:"id"`
+	UserID      string `json:"userId"`
+	Email       string `json:"email"`
+	ConnectedAt int    `json:"connectedAt"`
+}
+
 type Invite struct {
 	ID            string         `json:"id"`
 	UserID        string         `json:"userId"`
