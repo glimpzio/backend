@@ -3,19 +3,23 @@ package misc
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 type MailList struct {
 	sendgridKey     string
+	senderName      string
+	senderEmail     string
 	accountListId   string
 	marketingListId string
 }
 
 // Create a mail client
-func NewMailList(sendgridKey string, accountlistId string, marketingListId string) *MailList {
-	return &MailList{sendgridKey: sendgridKey, accountListId: accountlistId, marketingListId: marketingListId}
+func NewMailList(sendgridKey string, senderName string, senderEmail string, accountlistId string, marketingListId string) *MailList {
+	return &MailList{sendgridKey: sendgridKey, senderName: senderName, senderEmail: senderEmail, accountListId: accountlistId, marketingListId: marketingListId}
 }
 
 // Add to a mailing list
@@ -70,4 +74,25 @@ func (m *MailList) AddMarketing(email string, firstName *string, lastName *strin
 	}
 
 	return m.add(contactData)
+}
+
+// Send an email
+func (m *MailList) SendMail(name string, email string, subject string, body string) error {
+	from := mail.NewEmail(m.senderName, m.senderEmail)
+	to := mail.NewEmail(name, email)
+
+	message := mail.NewSingleEmailPlainText(from, subject, to, body)
+
+	client := sendgrid.NewSendClient(m.sendgridKey)
+	res, err := client.Send(message)
+	if err != nil {
+		return err
+	}
+
+	statusCode := res.StatusCode
+	if statusCode < 200 || statusCode >= 300 {
+		return errors.New(fmt.Sprintf("failed to send email with status code %d", statusCode))
+	}
+
+	return nil
 }

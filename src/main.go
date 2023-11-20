@@ -30,6 +30,8 @@ type Environment struct {
 	SendgridApiKey          string `json:"SENDGRID_API_KEY"`
 	SendgridListIdAccount   string `json:"SENDGRID_LIST_ID_ACCOUNT"`
 	SendgridListIdMarketing string `json:"SENDGRID_LIST_ID_MARKETING"`
+	SendgridSenderName      string `json:"SENDGRID_SENDER_NAME"`
+	SendgridSenderEmail     string `json:"SENDGRID_SENDER_EMAIL"`
 }
 
 const defaultPort = "8080"
@@ -98,7 +100,7 @@ func main() {
 		Auth0AudienceApi:  environment.Auth0AudienceApi,
 	}
 
-	mailList := misc.NewMailList(environment.SendgridApiKey, environment.SendgridListIdAccount, environment.SendgridListIdMarketing)
+	mailList := misc.NewMailList(environment.SendgridApiKey, environment.SendgridSenderName, environment.SendgridSenderEmail, environment.SendgridListIdAccount, environment.SendgridListIdMarketing)
 
 	profileService := profile.NewProfileService(db, mailList)
 

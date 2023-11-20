@@ -2,7 +2,7 @@ package profile
 
 import (
 	"database/sql"
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/glimpzio/backend/misc"
@@ -135,7 +135,7 @@ func (p *ProfileService) GetInvite(id string) (*Invite, *User, error) {
 	}
 
 	if rawInvite.ExpiresAt.Compare(time.Now()) < 0 {
-		return nil, nil, errors.New("invite has expired")
+		return nil, nil, ErrInviteExpired
 	}
 
 	rawUser, err := p.model.GetUserById(rawInvite.UserId)
@@ -162,4 +162,82 @@ func (p *ProfileService) GetInvite(id string) (*Invite, *User, error) {
 				Linkedin: rawUser.LinkedIn,
 			},
 		}, nil
+}
+
+// Connec the users by email signup
+func (p *ProfileService) ConnectByEmail(inviteId string, email string) (*EmailConnection, error) {
+	rawInvite, err := p.model.GetInvite(inviteId)
+	if err != nil {
+		return nil, err
+	}
+
+	if rawInvite.ExpiresAt.Compare(time.Now()) < 0 {
+		return nil, ErrInviteExpired
+	}
+
+	user, err := p.model.GetUserById(rawInvite.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	rawEmailConnection, err := p.model.CreateEmailConnection(user.Id, email)
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.mailList.AddMarketing(email, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	body := `Hey, hope you're well!
+
+	As you requested, here's the Glimpz profile for %s %s:
+	
+	- Bio: %s,
+	- Email: %s,
+	- Phone: %s,
+	- Website: %s,
+	- LinkedIn: %s
+
+	We've also forwarded your email to %s so they can follow up with you when they get a chance.
+
+	By the way, if you're ever looking to increase your own leads and sales from networking events like %s, did you know that you can make your own Glimpz profile for free right now? Glimpz makes it easy for you to connect with other professionals at networking events and convert them into long-lasting business partners or clients. Check it out at https://glimpz.io
+
+	Warm regards,
+	Glimpz
+	`
+
+	err = p.mailList.SendMail(email, email, fmt.Sprintf("Here's %s %s's Profile As You Requested!", user.FirstName, user.LastName),
+		fmt.Sprintf(body, user.FirstName, user.LastName, user.Bio, user.Email, user.Phone, user.Website, user.LinkedIn, user.FirstName, user.FirstName))
+	if err != nil {
+		return nil, err
+	}
+
+	return &EmailConnection{
+		Id:          rawEmailConnection.Id,
+		UserId:      rawEmailConnection.UserId,
+		Email:       rawEmailConnection.Email,
+		ConnectedAt: rawEmailConnection.ConnectedAt,
+	}, nil
+}
+
+// Get a list of the users connections
+func (p *ProfileService) GetEmailConnections(userId string) ([]*EmailConnection, error) {
+	rawEmailConnections, err := p.model.GetEmailConnections(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	emailConnections := []*EmailConnection{}
+	for _, rawEmailConnection := range rawEmailConnections {
+		emailConnections = append(emailConnections, &EmailConnection{
+			Id:          rawEmailConnection.Id,
+			UserId:      rawEmailConnection.UserId,
+			Email:       rawEmailConnection.Email,
+			ConnectedAt: rawEmailConnection.ConnectedAt,
+		})
+	}
+
+	return emailConnections, nil
 }
