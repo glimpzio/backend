@@ -83,6 +83,15 @@ func (m *MailList) SendMail(name string, email string, subject string, body stri
 
 	message := mail.NewSingleEmailPlainText(from, subject, to, body)
 
+	trackingSettings := mail.NewTrackingSettings()
+
+	clickTracking := mail.NewClickTrackingSetting()
+	clickTracking.SetEnable(false)
+	clickTracking.SetEnableText(false)
+
+	trackingSettings.SetClickTracking(clickTracking)
+	message.SetTrackingSettings(trackingSettings)
+
 	client := sendgrid.NewSendClient(m.sendgridKey)
 	res, err := client.Send(message)
 	if err != nil {
@@ -91,7 +100,7 @@ func (m *MailList) SendMail(name string, email string, subject string, body stri
 
 	statusCode := res.StatusCode
 	if statusCode < 200 || statusCode >= 300 {
-		return errors.New(fmt.Sprintf("failed to send email with status code %d", statusCode))
+		return fmt.Errorf("failed to send email with status code '%d' and message '%s'", statusCode, res.Body)
 	}
 
 	return nil

@@ -64,9 +64,10 @@ func (p *ProfileService) UpsertUser(authId string, user *NewUser) (*User, error)
 // Get a user by id
 func (p *ProfileService) GetUserById(id string) (*User, error) {
 	rawUser, err := p.model.GetUserById(id)
-
 	if err != nil {
 		return nil, err
+	} else if rawUser == nil {
+		return nil, ErrDoesNotExist
 	}
 
 	return &User{
@@ -89,9 +90,10 @@ func (p *ProfileService) GetUserById(id string) (*User, error) {
 // Get a user by auth id
 func (p *ProfileService) GetUserByAuthId(authId string) (*User, error) {
 	rawUser, err := p.model.GetUserByAuthId(authId)
-
 	if err != nil {
 		return nil, err
+	} else if rawUser == nil {
+		return nil, ErrDoesNotExist
 	}
 
 	return &User{
@@ -132,6 +134,8 @@ func (p *ProfileService) GetInvite(id string) (*Invite, *User, error) {
 	rawInvite, err := p.model.GetInvite(id)
 	if err != nil {
 		return nil, nil, err
+	} else if rawInvite == nil {
+		return nil, nil, ErrDoesNotExist
 	}
 
 	if rawInvite.ExpiresAt.Compare(time.Now()) < 0 {
@@ -169,6 +173,8 @@ func (p *ProfileService) ConnectByEmail(inviteId string, email string) (*EmailCo
 	rawInvite, err := p.model.GetInvite(inviteId)
 	if err != nil {
 		return nil, err
+	} else if rawInvite == nil {
+		return nil, ErrDoesNotExist
 	}
 
 	if rawInvite.ExpiresAt.Compare(time.Now()) < 0 {
@@ -190,26 +196,29 @@ func (p *ProfileService) ConnectByEmail(inviteId string, email string) (*EmailCo
 		return nil, err
 	}
 
-	body := `Hey, hope you're well!
+	body := fmt.Sprintf("Hey, hope you're well!\n\nAs you requested, here's the Glimpz profile for %s %s:\n\n- Bio: %s", user.FirstName, user.LastName, user.Bio)
 
-	As you requested, here's the Glimpz profile for %s %s:
-	
-	- Bio: %s,
-	- Email: %s,
-	- Phone: %s,
-	- Website: %s,
-	- LinkedIn: %s
+	if user.Email != nil {
+		body += fmt.Sprintf("\n- Email: %s", *user.Email)
+	}
+	if user.Phone != nil {
+		body += fmt.Sprintf("\n- Phone: %s", *user.Phone)
+	}
+	if user.Website != nil {
+		body += fmt.Sprintf("\n- Website: %s", *user.Website)
+	}
+	if user.LinkedIn != nil {
+		body += fmt.Sprintf("\n- LinkedIn: %s", *user.LinkedIn)
+	}
 
-	We've also forwarded your email to %s so they can follow up with you when they get a chance.
+	body += fmt.Sprintf("\n\nWe've also forwarded your email to %s so they can follow up with you when they get a chance.", user.FirstName)
+	body += fmt.Sprintf("\n\nBy the way, if you're ever looking to increase your own leads and sales from networking events like %s, did you know that you can make your own Glimpz profile for free right now? Glimpz makes it easy for you to connect with other professionals at networking events and convert them into long-lasting business partners or clients. Check it out at https://glimpz.io", user.FirstName)
 
-	By the way, if you're ever looking to increase your own leads and sales from networking events like %s, did you know that you can make your own Glimpz profile for free right now? Glimpz makes it easy for you to connect with other professionals at networking events and convert them into long-lasting business partners or clients. Check it out at https://glimpz.io
+	body += "\n\nWarm regards,\nBen"
 
-	Warm regards,
-	Glimpz
-	`
+	subject := fmt.Sprintf("Here's %s %s's Profile As You Requested!", user.FirstName, user.LastName)
 
-	err = p.mailList.SendMail(email, email, fmt.Sprintf("Here's %s %s's Profile As You Requested!", user.FirstName, user.LastName),
-		fmt.Sprintf(body, user.FirstName, user.LastName, user.Bio, user.Email, user.Phone, user.Website, user.LinkedIn, user.FirstName, user.FirstName))
+	err = p.mailList.SendMail(email, email, subject, body)
 	if err != nil {
 		return nil, err
 	}
