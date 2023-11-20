@@ -26,6 +26,7 @@ type Environment struct {
 	Auth0Domain             string `json:"AUTH0_DOMAIN"`
 	Auth0ClientId           string `json:"AUTH0_CLIENT_ID"`
 	Auth0ClientSecret       string `json:"AUTH0_CLIENT_SECRET"`
+	Auth0AudienceApi        string `json:"AUTH0_AUDIENCE_API"`
 	SendgridApiKey          string `json:"SENDGRID_API_KEY"`
 	SendgridListIdAccount   string `json:"SENDGRID_LIST_ID_ACCOUNT"`
 	SendgridListIdMarketing string `json:"SENDGRID_LIST_ID_MARKETING"`
@@ -93,6 +94,7 @@ func main() {
 		Auth0Domain:       environment.Auth0Domain,
 		Auth0ClientId:     environment.Auth0ClientId,
 		Auth0ClientSecret: environment.Auth0ClientSecret,
+		Auth0AudienceApi:  environment.Auth0AudienceApi,
 	}
 
 	mailList := misc.NewMailList(environment.SendgridApiKey, environment.SendgridListIdAccount, environment.SendgridListIdMarketing)

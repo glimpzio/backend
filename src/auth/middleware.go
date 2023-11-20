@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
+	"time"
 
-	"github.com/coreos/go-oidc"
+	"github.com/auth0/go-jwt-middleware/v2/jwks"
+	"github.com/auth0/go-jwt-middleware/v2/validator"
 	"github.com/glimpzio/backend/misc"
 )
 
@@ -35,30 +38,39 @@ type Auth0Config struct {
 	Auth0Domain       string
 	Auth0ClientId     string
 	Auth0ClientSecret string
+	Auth0AudienceApi  string
 }
 
 // Verify a token
-func VerifyToken(ctx context.Context, token string, config *Auth0Config) (*Token, error) {
-	provider, err := oidc.NewProvider(ctx, fmt.Sprintf("https://%s/", config.Auth0Domain))
+func VerifyToken(ctx context.Context, accessToken string, config *Auth0Config) (*Token, error) {
+	issuerUrl, err := url.Parse(fmt.Sprintf("https://%s/", config.Auth0Domain))
 	if err != nil {
 		return nil, err
 	}
 
-	verifier := provider.Verifier(&oidc.Config{ClientID: config.Auth0ClientId})
+	provider := jwks.NewCachingProvider(issuerUrl, time.Duration(time.Duration.Minutes(5)))
 
-	idToken, err := verifier.Verify(ctx, token)
+	jwtValidator, err := validator.New(
+		provider.KeyFunc,
+		validator.RS256,
+		issuerUrl.String(),
+		[]string{config.Auth0AudienceApi},
+		validator.WithAllowedClockSkew(time.Duration(time.Duration.Minutes(1))),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	var claims struct {
-		Email string `json:"email"`
-	}
-	if err := idToken.Claims(&claims); err != nil {
+	validated, err := jwtValidator.ValidateToken(ctx, accessToken)
+	if err != nil {
+		fmt.Println(err)
+
 		return nil, err
 	}
 
-	return &Token{AuthId: idToken.Subject}, nil
+	claims := validated.(*validator.ValidatedClaims)
+
+	return &Token{AuthId: claims.RegisteredClaims.Subject}, nil
 }
 
 // Apply middleware
