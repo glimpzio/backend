@@ -32,7 +32,7 @@ func (m *Model) CreateUser(authId string, firstName string, lastName string, per
 		return user, nil
 	}
 
-	err = tx.QueryRow("INSERT INTO users (auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin", authId, firstName, lastName, personalEmail, bio, profilePicture, email, phone, website, linkedin).
+	err = tx.QueryRow("INSERT INTO users (auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin", authId, firstName, lastName, personalEmail, bio, profilePicture, email, phone, website, linkedin).
 		Scan(&user.Id, &user.AuthId, &user.FirstName, &user.LastName, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
 	if err != nil {
 		return nil, err
