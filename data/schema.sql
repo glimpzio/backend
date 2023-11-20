@@ -21,3 +21,10 @@ CREATE TABLE invites (
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     expires_at TIMESTAMP NOT NULL
 );
+
+CREATE TABLE email_connections (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL references users(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    connected_at TIMESTAMP NOT NULL DEFAULT NOW()
+)

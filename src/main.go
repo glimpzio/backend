@@ -89,6 +89,7 @@ func main() {
 	if err != nil {
 		logger.ErrorLog.Fatalln(err)
 	}
+	defer db.Close()
 
 	auth0Config := &auth.Auth0Config{
 		Auth0Domain:       environment.Auth0Domain,
