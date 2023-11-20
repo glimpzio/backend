@@ -58,7 +58,7 @@ func VerifyToken(ctx context.Context, token string, config *Auth0Config) (*Token
 		return nil, err
 	}
 
-	return &Token{AuthId: idToken.Subject, Email: claims.Email}, nil
+	return &Token{AuthId: idToken.Subject}, nil
 }
 
 // Apply middleware
