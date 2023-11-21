@@ -62,7 +62,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ConnectByEmail func(childComplexity int, inviteID string, email string) int
+		ConnectByEmail func(childComplexity int, inviteID string, email string, subscribe bool) int
 		CreateInvite   func(childComplexity int) int
 		UpsertUser     func(childComplexity int, input model.NewUser) int
 	}
@@ -102,7 +102,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	UpsertUser(ctx context.Context, input model.NewUser) (*model.User, error)
 	CreateInvite(ctx context.Context) (*model.Invite, error)
-	ConnectByEmail(ctx context.Context, inviteID string, email string) (*model.EmailConnection, error)
+	ConnectByEmail(ctx context.Context, inviteID string, email string, subscribe bool) (*model.EmailConnection, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context) (*model.User, error)
@@ -195,7 +195,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ConnectByEmail(childComplexity, args["inviteId"].(string), args["email"].(string)), true
+		return e.complexity.Mutation.ConnectByEmail(childComplexity, args["inviteId"].(string), args["email"].(string), args["subscribe"].(bool)), true
 
 	case "Mutation.createInvite":
 		if e.complexity.Mutation.CreateInvite == nil {
@@ -501,6 +501,15 @@ func (ec *executionContext) field_Mutation_connectByEmail_args(ctx context.Conte
 		}
 	}
 	args["email"] = arg1
+	var arg2 bool
+	if tmp, ok := rawArgs["subscribe"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subscribe"))
+		arg2, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["subscribe"] = arg2
 	return args, nil
 }
 
@@ -1090,7 +1099,7 @@ func (ec *executionContext) _Mutation_connectByEmail(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ConnectByEmail(rctx, fc.Args["inviteId"].(string), fc.Args["email"].(string))
+		return ec.resolvers.Mutation().ConnectByEmail(rctx, fc.Args["inviteId"].(string), fc.Args["email"].(string), fc.Args["subscribe"].(bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

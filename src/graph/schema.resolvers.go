@@ -105,8 +105,8 @@ func (r *mutationResolver) CreateInvite(ctx context.Context) (*model.Invite, err
 }
 
 // ConnectByEmail is the resolver for the connectByEmail field.
-func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, email string) (*model.EmailConnection, error) {
-	emailConnection, err := r.ProfileService.ConnectByEmail(inviteID, email)
+func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, email string, subscribe bool) (*model.EmailConnection, error) {
+	emailConnection, err := r.ProfileService.ConnectByEmail(inviteID, email, subscribe)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 

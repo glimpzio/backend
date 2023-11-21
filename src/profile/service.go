@@ -169,7 +169,7 @@ func (p *ProfileService) GetInvite(id string) (*Invite, *User, error) {
 }
 
 // Connec the users by email signup
-func (p *ProfileService) ConnectByEmail(inviteId string, email string) (*EmailConnection, error) {
+func (p *ProfileService) ConnectByEmail(inviteId string, email string, subscribe bool) (*EmailConnection, error) {
 	rawInvite, err := p.model.GetInvite(inviteId)
 	if err != nil {
 		return nil, err
@@ -191,9 +191,11 @@ func (p *ProfileService) ConnectByEmail(inviteId string, email string) (*EmailCo
 		return nil, err
 	}
 
-	err = p.mailList.AddMarketing(email, nil, nil)
-	if err != nil {
-		return nil, err
+	if subscribe {
+		err = p.mailList.AddMarketing(email, nil, nil)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	body := fmt.Sprintf("Hey, hope you're well!\n\nAs you requested, here's the Glimpz profile for %s %s:\n\n- Bio: %s", user.FirstName, user.LastName, user.Bio)

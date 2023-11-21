@@ -66,5 +66,5 @@ input NewUser {
 type Mutation {
   upsertUser(input: NewUser!): User!
   createInvite: Invite!
-  connectByEmail(inviteId: ID!, email: String!): EmailConnection!
+  connectByEmail(inviteId: ID!, email: String!, subscribe: Boolean!): EmailConnection!
 }
