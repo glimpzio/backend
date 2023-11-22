@@ -31,7 +31,7 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 			Email:    input.Profile.Email,
 			Phone:    input.Profile.Phone,
 			Website:  input.Profile.Website,
-			Linkedin: input.Profile.Linkedin,
+			LinkedIn: input.Profile.Linkedin,
 		},
 	})
 	if err != nil {
@@ -53,7 +53,7 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 			Email:    user.Profile.Email,
 			Phone:    user.Profile.Phone,
 			Website:  user.Profile.Website,
-			Linkedin: user.Profile.Linkedin,
+			Linkedin: user.Profile.LinkedIn,
 		},
 	}, nil
 }
@@ -98,7 +98,7 @@ func (r *mutationResolver) CreateInvite(ctx context.Context) (*model.Invite, err
 				Email:    user.Profile.Email,
 				Phone:    user.Profile.Phone,
 				Website:  user.Profile.Website,
-				Linkedin: user.Profile.Linkedin,
+				Linkedin: user.Profile.LinkedIn,
 			},
 		},
 	}, nil
@@ -106,7 +106,7 @@ func (r *mutationResolver) CreateInvite(ctx context.Context) (*model.Invite, err
 
 // ConnectByEmail is the resolver for the connectByEmail field.
 func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, email string, subscribe bool) (*model.EmailConnection, error) {
-	emailConnection, err := r.ProfileService.ConnectByEmail(inviteID, email, subscribe)
+	emailConnection, err := r.ConnectionService.ConnectByEmail(inviteID, email, subscribe)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
@@ -152,7 +152,7 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 			Email:    user.Profile.Email,
 			Phone:    user.Profile.Phone,
 			Website:  user.Profile.Website,
-			Linkedin: user.Profile.Linkedin,
+			Linkedin: user.Profile.LinkedIn,
 		},
 	}, nil
 }
@@ -181,7 +181,7 @@ func (r *queryResolver) Invite(ctx context.Context, id string) (*model.Invite, e
 				Email:    user.Profile.Email,
 				Phone:    user.Profile.Phone,
 				Website:  user.Profile.Website,
-				Linkedin: user.Profile.Linkedin,
+				Linkedin: user.Profile.LinkedIn,
 			},
 		},
 	}, nil
@@ -205,7 +205,7 @@ func (r *queryResolver) EmailConnections(ctx context.Context) ([]*model.EmailCon
 
 	r.Logger.InfoLog.Printf("retrieved data for user %s", user.Id)
 
-	rawEmailConnections, err := r.ProfileService.GetEmailConnections(user.Id)
+	rawEmailConnections, err := r.ConnectionService.GetEmailConnections(user.Id)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 

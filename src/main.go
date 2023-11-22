@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/gin-gonic/gin"
 	"github.com/glimpzio/backend/auth"
+	"github.com/glimpzio/backend/connections"
 	"github.com/glimpzio/backend/graph"
 	"github.com/glimpzio/backend/misc"
 	"github.com/glimpzio/backend/profile"
@@ -104,6 +105,7 @@ func main() {
 	mailList := misc.NewMailList(environment.SendgridApiKey, environment.SendgridSenderName, environment.SendgridSenderEmail, environment.SendgridListIdAccount, environment.SendgridListIdMarketing)
 
 	profileService := profile.NewProfileService(db, mailList)
+	connectionService := connections.NewConnectionService(db, mailList, profileService)
 
 	// Initialize handlers
 	r := gin.Default()
@@ -115,7 +117,7 @@ func main() {
 		AllowCredentials: true,
 	}))
 	r.Use(misc.GinContextToContextMiddleware())
-	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{Logger: logger, ProfileService: profileService}))
+	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{Logger: logger, ProfileService: profileService, ConnectionService: connectionService}))
 	r.GET("/", playgroundHandler())
 
 	logger.InfoLog.Printf("connect to http://localhost:%s/ for GraphQL playground", port)

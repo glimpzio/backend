@@ -21,10 +21,3 @@ type Invite struct {
 	UserId    string    `json:"userId"`
 	ExpiresAt time.Time `json:"expiresAt"`
 }
-
-type EmailConnection struct {
-	Id          string    `json:"id"`
-	UserId      string    `json:"userId"`
-	Email       string    `json:"email"`
-	ConnectedAt time.Time `json:"connectedAt"`
-}
