@@ -107,18 +107,16 @@ func main() {
 
 	// Initialize handlers
 	r := gin.Default()
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST"},
+		AllowHeaders:     []string{"Authorization", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 	r.Use(misc.GinContextToContextMiddleware())
 	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{Logger: logger, ProfileService: profileService}))
 	r.GET("/", playgroundHandler())
-
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"*"},
-		AllowHeaders:     []string{"*"},
-		ExposeHeaders:    []string{"*"},
-		AllowCredentials: true,
-	}))
 
 	logger.InfoLog.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	logger.ErrorLog.Fatal(r.Run())
