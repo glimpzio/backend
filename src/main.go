@@ -8,6 +8,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/gin-contrib/cors"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -106,6 +107,7 @@ func main() {
 
 	// Initialize handlers
 	r := gin.Default()
+	r.Use(cors.Default())
 	r.Use(misc.GinContextToContextMiddleware())
 	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{Logger: logger, ProfileService: profileService}))
 	r.GET("/", playgroundHandler())
