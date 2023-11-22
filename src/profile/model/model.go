@@ -136,11 +136,11 @@ func (m *Model) CreateEmailConnection(userId string, email string) (*EmailConnec
 	return emailConnection, nil
 }
 
-// Get a list of email connections for a user
+// Get a list of distinct email connections for a user
 func (m *Model) GetEmailConnections(userId string) ([]*EmailConnection, error) {
 	emailConnections := []*EmailConnection{}
 
-	rows, err := m.Db.Query("SELECT id, user_id, email, connected_at FROM email_connections WHERE user_id = $1", userId)
+	rows, err := m.Db.Query("SELECT DISTINCT ON (email) id, user_id, email, connected_at FROM email_connections WHERE user_id = $1", userId)
 	if err != nil {
 		return nil, err
 	}
