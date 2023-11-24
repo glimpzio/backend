@@ -34,6 +34,7 @@ type Environment struct {
 	SendgridListIdMarketing string `json:"SENDGRID_LIST_ID_MARKETING"`
 	SendgridSenderName      string `json:"SENDGRID_SENDER_NAME"`
 	SendgridSenderEmail     string `json:"SENDGRID_SENDER_EMAIL"`
+	SiteBaseUrl             string `json:"SITE_BASE_URL"`
 }
 
 const defaultPort = "8080"
@@ -105,12 +106,12 @@ func main() {
 	mailList := misc.NewMailList(environment.SendgridApiKey, environment.SendgridSenderName, environment.SendgridSenderEmail, environment.SendgridListIdAccount, environment.SendgridListIdMarketing)
 
 	profileService := profile.NewProfileService(db, mailList)
-	connectionService := connections.NewConnectionService(db, mailList, profileService)
+	connectionService := connections.NewConnectionService(db, mailList, profileService, environment.SiteBaseUrl)
 
 	// Initialize handlers
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{environment.SiteBaseUrl},
 		AllowMethods:     []string{"GET", "POST"},
 		AllowHeaders:     []string{"Authorization", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
