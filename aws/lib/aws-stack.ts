@@ -161,18 +161,36 @@ export class AwsStack extends cdk.Stack {
         });
 
         // Database
-        const database = new rds.ServerlessCluster(this, "appDatabase", {
-            engine: rds.DatabaseClusterEngine.AURORA_POSTGRESQL,
-            parameterGroup: rds.ParameterGroup.fromParameterGroupName(this, "ParameterGroup", "default.aurora-postgresql10"),
-            vpc: vpc,
-            scaling: {
-                minCapacity: rds.AuroraCapacityUnit.ACU_1,
-                maxCapacity: rds.AuroraCapacityUnit.ACU_1,
+        const dbCluster = new rds.DatabaseCluster(this, "appDbCluster", {
+            engine: rds.DatabaseClusterEngine.auroraPostgres({
+                version: rds.AuroraPostgresEngineVersion.VER_14_4,
+            }),
+            instances: 1,
+            instanceProps: {
+                vpc,
+                instanceType: new ec2.InstanceType("serverless"),
+                autoMinorVersionUpgrade: true,
+                publiclyAccessible: true,
+                vpcSubnets: vpc.selectSubnets({
+                    subnetType: ec2.SubnetType.PUBLIC,
+                }),
+            },
+            port: 5432,
+        });
+
+        cdk.Aspects.of(dbCluster).add({
+            visit(node) {
+                if (node instanceof rds.CfnDBCluster) {
+                    node.serverlessV2ScalingConfiguration = {
+                        minCapacity: 0.5,
+                        maxCapacity: 1,
+                    };
+                }
             },
         });
 
-        database.connections.allowDefaultPortFrom(fargateService);
+        dbCluster.connections.allowDefaultPortFrom(fargateService);
 
-        database.secret!.grantRead(taskExecRole);
+        dbCluster.secret!.grantRead(taskExecRole);
     }
 }
