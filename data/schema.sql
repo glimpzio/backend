@@ -17,7 +17,6 @@ CREATE TABLE users (
     linkedin TEXT
 );
 
--- Connections service
 CREATE TABLE invites (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     -- Upon migrating to microservices remove "user_id" as a forein key
@@ -25,6 +24,7 @@ CREATE TABLE invites (
     expires_at TIMESTAMP NOT NULL
 );
 
+-- Connections service
 CREATE TABLE email_connections (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     -- Upon migrating to microservices remove "user_id" as a forein key
