@@ -30,6 +30,6 @@
         "hostedZoneName": "glimpz.io",
         "hostedZoneId": "Z071656330WFSFZAT5XEO",
         "lbSubdomainName": "api.glimpz.io",
-        "desiredCount": 0
+        "desiredCount": 1
     }
 }
