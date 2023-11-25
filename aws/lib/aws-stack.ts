@@ -13,9 +13,6 @@ import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as rds from "aws-cdk-lib/aws-rds";
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
-import { config } from "dotenv";
-
-config();
 
 export class AwsStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -30,15 +27,7 @@ export class AwsStack extends cdk.Stack {
 
         const vpc = new ec2.Vpc(this, "appVpc", {
             ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
-            maxAzs: 2,
-            subnetConfiguration: [
-                {
-                    cidrMask: 24,
-                    name: "Public",
-                    subnetType: ec2.SubnetType.PUBLIC,
-                },
-            ],
-            natGateways: 0,
+            natGateways: 1,
         });
 
         const secret = new secretsmanager.Secret(this, "appSecret");
@@ -49,6 +38,39 @@ export class AwsStack extends cdk.Stack {
 
         taskExecRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonECSTaskExecutionRolePolicy"));
         secret.grantRead(taskExecRole);
+
+        // Database
+        const PORT = 5432;
+
+        const dbCluster = new rds.DatabaseCluster(this, "appDbCluster", {
+            engine: rds.DatabaseClusterEngine.auroraPostgres({
+                version: rds.AuroraPostgresEngineVersion.VER_14_4,
+            }),
+            instances: 1,
+            instanceProps: {
+                vpc,
+                instanceType: new ec2.InstanceType("serverless"),
+            },
+            port: PORT,
+        });
+
+        cdk.Aspects.of(dbCluster).add({
+            visit(node) {
+                if (node instanceof rds.CfnDBCluster) {
+                    node.serverlessV2ScalingConfiguration = {
+                        minCapacity: 0.5,
+                        maxCapacity: 1,
+                    };
+                }
+            },
+        });
+
+        dbCluster.secret!.grantRead(taskExecRole);
+
+        // Setup bastion host
+        new ec2.BastionHostLinux(this, "appBastionHost", {
+            vpc,
+        });
 
         const taskDefinition = new ecs.FargateTaskDefinition(this, "appTaskDefinition", {
             cpu: 256,
@@ -61,6 +83,7 @@ export class AwsStack extends cdk.Stack {
             portMappings: [{ containerPort: 8080 }],
             environment: {
                 AWS_SECRET_NAME: secret.secretName,
+                DB_SECRET_NAME: dbCluster.secret!.secretName,
             },
             logging: ecs.LogDrivers.awsLogs({
                 streamPrefix: "app",
@@ -82,6 +105,8 @@ export class AwsStack extends cdk.Stack {
             ],
             desiredCount: this.node.getContext("desiredCount"),
         });
+
+        dbCluster.connections.allowDefaultPortFrom(fargateService);
 
         const loadBalancer = new elbv2.ApplicationLoadBalancer(this, "appLoadBalancer", {
             vpc,
@@ -162,41 +187,5 @@ export class AwsStack extends cdk.Stack {
         //         { stageName: "Deploy", actions: [deploymentAction] },
         //     ],
         // });
-
-        // Database
-        const PORT = 5432;
-
-        const dbCluster = new rds.DatabaseCluster(this, "appDbCluster", {
-            engine: rds.DatabaseClusterEngine.auroraPostgres({
-                version: rds.AuroraPostgresEngineVersion.VER_14_4,
-            }),
-            instances: 1,
-            instanceProps: {
-                vpc,
-                instanceType: new ec2.InstanceType("serverless"),
-                autoMinorVersionUpgrade: true,
-                publiclyAccessible: true,
-                vpcSubnets: vpc.selectSubnets({
-                    subnetType: ec2.SubnetType.PUBLIC,
-                }),
-            },
-            port: PORT,
-        });
-
-        cdk.Aspects.of(dbCluster).add({
-            visit(node) {
-                if (node instanceof rds.CfnDBCluster) {
-                    node.serverlessV2ScalingConfiguration = {
-                        minCapacity: 0.5,
-                        maxCapacity: 1,
-                    };
-                }
-            },
-        });
-
-        dbCluster.connections.allowDefaultPortFrom(fargateService);
-        if (process.env.IP_ADDRESS) dbCluster.connections.allowFrom(ec2.Peer.ipv4(process.env.IP_ADDRESS), ec2.Port.tcp(PORT));
-
-        dbCluster.secret!.grantRead(taskExecRole);
     }
 }

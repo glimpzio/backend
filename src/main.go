@@ -27,9 +27,6 @@ type environment struct {
 	SendgridSenderName      string `json:"SENDGRID_SENDER_NAME"`
 	SendgridSenderEmail     string `json:"SENDGRID_SENDER_EMAIL"`
 	SiteBaseUrl             string `json:"SITE_BASE_URL"`
-	DbSecretName            string `json:"DB_SECRET_NAME"`
-	DbNameProd              string `json:"DB_NAME_PROD"`
-	DbNameDev               string `json:"DB_NAME_DEV"`
 }
 
 const defaultPort = "8080"
@@ -54,8 +51,8 @@ func playgroundHandler() gin.HandlerFunc {
 func main() {
 	logger := misc.NewLogger("Gateway", os.Stdout)
 
-	if err := godotenv.Load(); err == nil {
-		logger.InfoLog.Println("loaded .env")
+	if err := godotenv.Load(); err != nil {
+		logger.ErrorLog.Println(err)
 	}
 
 	port := os.Getenv("PORT")
@@ -70,16 +67,7 @@ func main() {
 	}
 
 	// Initialize services
-	var dbName string
-	if os.Getenv("ENV") == "production" {
-		dbName = env.DbNameProd
-	} else {
-		dbName = env.DbNameDev
-	}
-
-	logger.InfoLog.Printf("using db %s", dbName)
-
-	db, err := misc.LoadDatabaseFromSecret(env.DbSecretName, dbName)
+	db, err := misc.LoadDatabaseFromSecret(os.Getenv("DB_SECRET_NAME"))
 	if err != nil {
 		logger.ErrorLog.Fatalln(err)
 	}

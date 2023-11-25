@@ -13,7 +13,6 @@ RUN ["go", "build", "-o", "main", "main.go"]
 FROM alpine:3.17 AS runtime
 
 ENV GIN_MODE=release
-ENV ENV=production
 
 WORKDIR /usr/app
 

@@ -43,16 +43,18 @@ type databaseSecret struct {
 	Port                int    `json:"port"`
 	Host                string `json:"host"`
 	Username            string `json:"username"`
+	Database            string `json:"database"`
+	SSLMode             string `json:"sslmode"`
 }
 
 // Load database from secret
-func LoadDatabaseFromSecret(secretName string, database string) (*sql.DB, error) {
+func LoadDatabaseFromSecret(secretName string) (*sql.DB, error) {
 	dbEnv := &databaseSecret{}
 	if err := LoadSecret(secretName, dbEnv); err != nil {
 		return nil, err
 	}
 
-	dbString := fmt.Sprintf("postgresql://%s:%s@%s:%d/%s", dbEnv.Username, dbEnv.Password, dbEnv.Host, dbEnv.Port, database)
+	dbString := fmt.Sprintf("postgresql://%s:%s@%s:%d/%s?sslmode=%s", dbEnv.Username, dbEnv.Password, dbEnv.Host, dbEnv.Port, dbEnv.Database, dbEnv.SSLMode)
 	db, err := sql.Open("postgres", dbString)
 	if err != nil {
 		return nil, err
