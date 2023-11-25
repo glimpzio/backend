@@ -13,6 +13,9 @@ import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as rds from "aws-cdk-lib/aws-rds";
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import { config } from "dotenv";
+
+config();
 
 export class AwsStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -161,6 +164,8 @@ export class AwsStack extends cdk.Stack {
         });
 
         // Database
+        const PORT = 5432;
+
         const dbCluster = new rds.DatabaseCluster(this, "appDbCluster", {
             engine: rds.DatabaseClusterEngine.auroraPostgres({
                 version: rds.AuroraPostgresEngineVersion.VER_14_4,
@@ -175,7 +180,7 @@ export class AwsStack extends cdk.Stack {
                     subnetType: ec2.SubnetType.PUBLIC,
                 }),
             },
-            port: 5432,
+            port: PORT,
         });
 
         cdk.Aspects.of(dbCluster).add({
@@ -190,6 +195,7 @@ export class AwsStack extends cdk.Stack {
         });
 
         dbCluster.connections.allowDefaultPortFrom(fargateService);
+        if (process.env.IP_ADDRESS) dbCluster.connections.allowFrom(ec2.Peer.ipv4(process.env.IP_ADDRESS), ec2.Port.tcp(PORT));
 
         dbCluster.secret!.grantRead(taskExecRole);
     }
