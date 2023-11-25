@@ -5,14 +5,16 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/gin-contrib/cors"
 
+	// "github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/glimpzio/backend/auth"
-	"github.com/glimpzio/backend/connections"
+
+	// "github.com/glimpzio/backend/connections"
 	"github.com/glimpzio/backend/graph"
 	"github.com/glimpzio/backend/misc"
-	"github.com/glimpzio/backend/profile"
+
+	// "github.com/glimpzio/backend/profile"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -64,51 +66,52 @@ func main() {
 		port = defaultPort
 	}
 
-	// Load environment variables
-	environment := &Environment{}
-	if err := misc.LoadSecret(os.Getenv("AWS_SECRET_NAME"), environment); err != nil {
-		logger.ErrorLog.Fatalln(err)
-	}
+	// // Load environment variables
+	// environment := &Environment{}
+	// if err := misc.LoadSecret(os.Getenv("AWS_SECRET_NAME"), environment); err != nil {
+	// 	logger.ErrorLog.Fatalln(err)
+	// }
 
-	// Initialize services
-	var dbName string
-	if os.Getenv("ENV") == "production" {
-		dbName = environment.DbNameProd
-	} else {
-		dbName = environment.DbNameDev
-	}
+	// // Initialize services
+	// var dbName string
+	// if os.Getenv("ENV") == "production" {
+	// 	dbName = environment.DbNameProd
+	// } else {
+	// 	dbName = environment.DbNameDev
+	// }
 
-	logger.InfoLog.Printf("using db %s", dbName)
+	// logger.InfoLog.Printf("using db %s", dbName)
 
-	db, err := misc.LoadDatabaseFromSecret(environment.DbSecretName, dbName)
-	if err != nil {
-		logger.ErrorLog.Fatalln(err)
-	}
-	defer db.Close()
+	// db, err := misc.LoadDatabaseFromSecret(environment.DbSecretName, dbName)
+	// if err != nil {
+	// 	logger.ErrorLog.Fatalln(err)
+	// }
+	// defer db.Close()
 
-	auth0Config := &auth.Auth0Config{
-		Auth0Domain:       environment.Auth0Domain,
-		Auth0ClientId:     environment.Auth0ClientId,
-		Auth0ClientSecret: environment.Auth0ClientSecret,
-		Auth0AudienceApi:  environment.Auth0AudienceApi,
-	}
+	// auth0Config := &auth.Auth0Config{
+	// 	Auth0Domain:       environment.Auth0Domain,
+	// 	Auth0ClientId:     environment.Auth0ClientId,
+	// 	Auth0ClientSecret: environment.Auth0ClientSecret,
+	// 	Auth0AudienceApi:  environment.Auth0AudienceApi,
+	// }
 
-	mailList := misc.NewMailList(environment.SendgridApiKey, environment.SendgridSenderName, environment.SendgridSenderEmail, environment.SendgridListIdAccount, environment.SendgridListIdMarketing)
+	// mailList := misc.NewMailList(environment.SendgridApiKey, environment.SendgridSenderName, environment.SendgridSenderEmail, environment.SendgridListIdAccount, environment.SendgridListIdMarketing)
 
-	profileService := profile.NewProfileService(db, db, mailList)
-	connectionService := connections.NewConnectionService(db, db, mailList, profileService, environment.SiteBaseUrl)
+	// profileService := profile.NewProfileService(db, db, mailList)
+	// connectionService := connections.NewConnectionService(db, db, mailList, profileService, environment.SiteBaseUrl)
 
-	// Initialize handlers
+	// // Initialize handlers
 	r := gin.Default()
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{environment.SiteBaseUrl},
-		AllowMethods:     []string{"GET", "POST"},
-		AllowHeaders:     []string{"Authorization", "Content-Type"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-	}))
+	// r.Use(cors.New(cors.Config{
+	// 	AllowOrigins:     []string{environment.SiteBaseUrl},
+	// 	AllowMethods:     []string{"GET", "POST"},
+	// 	AllowHeaders:     []string{"Authorization", "Content-Type"},
+	// 	ExposeHeaders:    []string{"Content-Length"},
+	// 	AllowCredentials: true,
+	// }))
 	r.Use(misc.GinContextToContextMiddleware())
-	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{Logger: logger, ProfileService: profileService, ConnectionService: connectionService}))
+	// r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{Logger: logger, ProfileService: profileService, ConnectionService: connectionService}))
+	r.POST("/query", graphqlHandler(logger, nil, &graph.Resolver{Logger: logger, ProfileService: nil, ConnectionService: nil}))
 	r.GET("/", playgroundHandler())
 
 	logger.InfoLog.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
