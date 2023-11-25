@@ -63,8 +63,6 @@ func VerifyToken(ctx context.Context, accessToken string, config *Auth0Config) (
 
 	validated, err := jwtValidator.ValidateToken(ctx, accessToken)
 	if err != nil {
-		fmt.Println(err)
-
 		return nil, err
 	}
 
