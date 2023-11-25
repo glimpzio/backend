@@ -17,8 +17,8 @@ type ConnectionService struct {
 }
 
 // Create a new profile service
-func NewConnectionService(db *sql.DB, mailList *misc.MailList, profileService *profile.ProfileService, siteBaseUrl string) *ConnectionService {
-	return &ConnectionService{model: &model.Model{Db: db}, mailList: mailList, profileService: profileService, siteBaseUrl: siteBaseUrl}
+func NewConnectionService(readDb *sql.DB, writeDb *sql.DB, mailList *misc.MailList, profileService *profile.ProfileService, siteBaseUrl string) *ConnectionService {
+	return &ConnectionService{model: &model.Model{ReadDb: readDb, WriteDb: writeDb}, mailList: mailList, profileService: profileService, siteBaseUrl: siteBaseUrl}
 }
 
 // Connec the users by email signup

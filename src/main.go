@@ -105,8 +105,8 @@ func main() {
 
 	mailList := misc.NewMailList(environment.SendgridApiKey, environment.SendgridSenderName, environment.SendgridSenderEmail, environment.SendgridListIdAccount, environment.SendgridListIdMarketing)
 
-	profileService := profile.NewProfileService(db, mailList)
-	connectionService := connections.NewConnectionService(db, mailList, profileService, environment.SiteBaseUrl)
+	profileService := profile.NewProfileService(db, db, mailList)
+	connectionService := connections.NewConnectionService(db, db, mailList, profileService, environment.SiteBaseUrl)
 
 	// Initialize handlers
 	r := gin.Default()

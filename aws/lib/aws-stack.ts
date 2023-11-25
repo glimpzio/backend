@@ -11,6 +11,7 @@ import * as codepipelineActions from "aws-cdk-lib/aws-codepipeline-actions";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as rds from "aws-cdk-lib/aws-rds";
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 
 export class AwsStack extends cdk.Stack {
@@ -158,5 +159,20 @@ export class AwsStack extends cdk.Stack {
                 { stageName: "Deploy", actions: [deploymentAction] },
             ],
         });
+
+        // Database
+        const database = new rds.ServerlessCluster(this, "appDatabase", {
+            engine: rds.DatabaseClusterEngine.AURORA_POSTGRESQL,
+            parameterGroup: rds.ParameterGroup.fromParameterGroupName(this, "ParameterGroup", "default.aurora-postgresql10"),
+            vpc: vpc,
+            scaling: {
+                minCapacity: rds.AuroraCapacityUnit.ACU_1,
+                maxCapacity: rds.AuroraCapacityUnit.ACU_1,
+            },
+        });
+
+        database.connections.allowDefaultPortFrom(fargateService);
+
+        database.secret!.grantRead(taskExecRole);
     }
 }

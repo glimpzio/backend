@@ -14,8 +14,8 @@ type ProfileService struct {
 }
 
 // Create a new profile service
-func NewProfileService(db *sql.DB, mailList *misc.MailList) *ProfileService {
-	return &ProfileService{model: &model.Model{Db: db}, mailList: mailList}
+func NewProfileService(readDb *sql.DB, writeDb *sql.DB, mailList *misc.MailList) *ProfileService {
+	return &ProfileService{model: &model.Model{ReadDb: readDb, WriteDb: writeDb}, mailList: mailList}
 }
 
 // Upsert a user

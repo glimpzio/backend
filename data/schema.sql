@@ -2,6 +2,7 @@
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Profile service
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     auth_id TEXT NOT NULL UNIQUE,
@@ -16,8 +17,10 @@ CREATE TABLE users (
     linkedin TEXT
 );
 
+-- Connections service
 CREATE TABLE invites (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    -- Upon migrating to microservices remove "user_id" as a forein key
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     expires_at TIMESTAMP NOT NULL
 );
