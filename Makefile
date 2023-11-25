@@ -1,15 +1,4 @@
-FILE="docker/docker-compose.yaml"
-
-.PHONY: up seed down run generate deploy
-
-up:
-	docker-compose -f $(FILE) up -d
-
-seed:
-	docker-compose -f $(FILE) exec -T db psql -U postgres -f /var/data/schema.sql
-
-down:
-	docker-compose -f $(FILE) down
+.PHONY: run generate deploy
 
 run:
 	cd src && go run main.go

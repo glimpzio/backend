@@ -31,4 +31,4 @@ CREATE TABLE email_connections (
     user_id UUID NOT NULL references users(id) ON DELETE CASCADE,
     email TEXT NOT NULL,
     connected_at TIMESTAMP NOT NULL DEFAULT NOW()
-)
+);
