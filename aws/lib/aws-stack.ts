@@ -116,52 +116,52 @@ export class AwsStack extends cdk.Stack {
         });
 
         // CICD pipeline
-        const buildProject = new codebuild.PipelineProject(this, "appBuildProject", {
-            environment: {
-                buildImage: codebuild.LinuxBuildImage.STANDARD_1_0,
-                privileged: true,
-            },
-            environmentVariables: {
-                ECR_REPO_URI: {
-                    value: ecrRepo.repositoryUri,
-                    type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
-                },
-            },
-        });
+        // const buildProject = new codebuild.PipelineProject(this, "appBuildProject", {
+        //     environment: {
+        //         buildImage: codebuild.LinuxBuildImage.STANDARD_1_0,
+        //         privileged: true,
+        //     },
+        //     environmentVariables: {
+        //         ECR_REPO_URI: {
+        //             value: ecrRepo.repositoryUri,
+        //             type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+        //         },
+        //     },
+        // });
 
-        ecrRepo.grantPullPush(buildProject);
+        // ecrRepo.grantPullPush(buildProject);
 
-        const sourceOutput = new codepipeline.Artifact();
-        const sourceAction = new codepipelineActions.GitHubSourceAction({
-            actionName: "GitHubSource",
-            owner: this.node.getContext("ghOwner"),
-            repo: this.node.getContext("ghRepo"),
-            branch: this.node.getContext("ghBranch"),
-            output: sourceOutput,
-            oauthToken: cdk.SecretValue.secretsManager(this.node.getContext("ghTokenSecret")),
-        });
+        // const sourceOutput = new codepipeline.Artifact();
+        // const sourceAction = new codepipelineActions.GitHubSourceAction({
+        //     actionName: "GitHubSource",
+        //     owner: this.node.getContext("ghOwner"),
+        //     repo: this.node.getContext("ghRepo"),
+        //     branch: this.node.getContext("ghBranch"),
+        //     output: sourceOutput,
+        //     oauthToken: cdk.SecretValue.secretsManager(this.node.getContext("ghTokenSecret")),
+        // });
 
-        const buildOutput = new codepipeline.Artifact();
-        const buildAction = new codepipelineActions.CodeBuildAction({
-            actionName: "DockerBuild",
-            project: buildProject,
-            input: sourceOutput,
-            outputs: [buildOutput],
-        });
+        // const buildOutput = new codepipeline.Artifact();
+        // const buildAction = new codepipelineActions.CodeBuildAction({
+        //     actionName: "DockerBuild",
+        //     project: buildProject,
+        //     input: sourceOutput,
+        //     outputs: [buildOutput],
+        // });
 
-        const deploymentAction = new codepipelineActions.EcsDeployAction({
-            actionName: "DeployAction",
-            service: fargateService,
-            input: buildOutput,
-        });
+        // const deploymentAction = new codepipelineActions.EcsDeployAction({
+        //     actionName: "DeployAction",
+        //     service: fargateService,
+        //     input: buildOutput,
+        // });
 
-        new codepipeline.Pipeline(this, "appPipeline", {
-            stages: [
-                { stageName: "Source", actions: [sourceAction] },
-                { stageName: "Build", actions: [buildAction] },
-                { stageName: "Deploy", actions: [deploymentAction] },
-            ],
-        });
+        // new codepipeline.Pipeline(this, "appPipeline", {
+        //     stages: [
+        //         { stageName: "Source", actions: [sourceAction] },
+        //         { stageName: "Build", actions: [buildAction] },
+        //         { stageName: "Deploy", actions: [deploymentAction] },
+        //     ],
+        // });
 
         // Database
         const PORT = 5432;
