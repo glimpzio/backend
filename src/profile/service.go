@@ -66,7 +66,7 @@ func (p *ProfileService) GetUserById(id string) (*User, error) {
 	if err != nil {
 		return nil, err
 	} else if rawUser == nil {
-		return nil, ErrDoesNotExist
+		return nil, ErrInvalidUser
 	}
 
 	return &User{
@@ -92,7 +92,7 @@ func (p *ProfileService) GetUserByAuthId(authId string) (*User, error) {
 	if err != nil {
 		return nil, err
 	} else if rawUser == nil {
-		return nil, ErrDoesNotExist
+		return nil, ErrInvalidUser
 	}
 
 	return &User{
@@ -134,7 +134,7 @@ func (p *ProfileService) GetInvite(id string) (*Invite, *User, error) {
 	if err != nil {
 		return nil, nil, err
 	} else if rawInvite == nil {
-		return nil, nil, ErrDoesNotExist
+		return nil, nil, ErrInvalidInvite
 	}
 
 	if rawInvite.ExpiresAt.Compare(time.Now()) < 0 {

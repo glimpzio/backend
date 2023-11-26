@@ -16,9 +16,9 @@ import (
 func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) (*model.User, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
-		r.Logger.ErrorLog.Println(auth.ErrMissingAuthHeader)
+		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
 
-		return nil, auth.ErrMissingAuthHeader
+		return nil, ErrMissingAuthHeader
 	}
 
 	user, err := r.ProfileService.UpsertUser(middleware.Token.AuthId, &profile.NewUser{
@@ -37,7 +37,7 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
-		return nil, err
+		return nil, ErrCreateResourceFailed
 	}
 
 	r.Logger.InfoLog.Printf("upserted user %s", user.Id)
@@ -62,16 +62,16 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 func (r *mutationResolver) CreateInvite(ctx context.Context) (*model.Invite, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
-		r.Logger.ErrorLog.Println(auth.ErrMissingAuthHeader)
+		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
 
-		return nil, auth.ErrMissingAuthHeader
+		return nil, ErrMissingAuthHeader
 	}
 
 	user, err := r.ProfileService.GetUserByAuthId(middleware.Token.AuthId)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
-		return nil, err
+		return nil, ErrGetResourceFailed
 	}
 
 	r.Logger.InfoLog.Printf("retrieved data for user %s", user.Id)
@@ -80,7 +80,7 @@ func (r *mutationResolver) CreateInvite(ctx context.Context) (*model.Invite, err
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
-		return nil, err
+		return nil, ErrCreateResourceFailed
 	}
 
 	r.Logger.InfoLog.Printf("created invite %s", invite.Id)
@@ -110,7 +110,7 @@ func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, 
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
-		return nil, err
+		return nil, ErrOperationFailed
 	}
 
 	r.Logger.InfoLog.Printf("connected by email for invite %s", inviteID)
@@ -127,16 +127,16 @@ func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, 
 func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
-		r.Logger.ErrorLog.Println(auth.ErrMissingAuthHeader)
+		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
 
-		return nil, auth.ErrMissingAuthHeader
+		return nil, ErrMissingAuthHeader
 	}
 
 	user, err := r.ProfileService.GetUserByAuthId(middleware.Token.AuthId)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
-		return nil, err
+		return nil, ErrGetResourceFailed
 	}
 
 	r.Logger.InfoLog.Printf("retrieved data for user %s", user.Id)
@@ -163,7 +163,7 @@ func (r *queryResolver) Invite(ctx context.Context, id string) (*model.Invite, e
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
-		return nil, err
+		return nil, ErrGetResourceFailed
 	}
 
 	r.Logger.InfoLog.Printf("retrieved invite %s", invite.Id)
@@ -191,16 +191,16 @@ func (r *queryResolver) Invite(ctx context.Context, id string) (*model.Invite, e
 func (r *queryResolver) EmailConnections(ctx context.Context) ([]*model.EmailConnection, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
-		r.Logger.ErrorLog.Println(auth.ErrMissingAuthHeader)
+		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
 
-		return nil, auth.ErrMissingAuthHeader
+		return nil, ErrMissingAuthHeader
 	}
 
 	user, err := r.ProfileService.GetUserByAuthId(middleware.Token.AuthId)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
-		return nil, err
+		return nil, ErrGetResourceFailed
 	}
 
 	r.Logger.InfoLog.Printf("retrieved data for user %s", user.Id)
@@ -209,7 +209,7 @@ func (r *queryResolver) EmailConnections(ctx context.Context) ([]*model.EmailCon
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
-		return nil, err
+		return nil, ErrGetResourceFailed
 	}
 
 	r.Logger.InfoLog.Printf("retrieved email connections for user %s", user.Id)

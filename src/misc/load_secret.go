@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -50,15 +49,16 @@ type databaseSecret struct {
 
 // Load database from secret
 func LoadDatabaseFromSecret(secretName string) (*sql.DB, error) {
+
 	dbEnv := &databaseSecret{}
 	if err := LoadSecret(secretName, dbEnv); err != nil {
 		return nil, err
 	}
 
-	dbString := fmt.Sprintf("postgresql://%s:%s@%s:%d/%s?sslmode=%s", dbEnv.Username, dbEnv.Password, dbEnv.Host, dbEnv.Port, dbEnv.Database, dbEnv.SSLMode)
+	dbString := fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s sslmode=%s", dbEnv.Username, dbEnv.Password, dbEnv.Host, dbEnv.Port, dbEnv.Database, dbEnv.SSLMode)
 	db, err := sql.Open("postgres", dbString)
 	if err != nil {
-		return nil, errors.New("failed to connect to database using provided query string")
+		return nil, err
 	}
 
 	return db, nil
