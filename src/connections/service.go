@@ -56,7 +56,7 @@ func (c *ConnectionService) ConnectByEmail(inviteId string, email string, subscr
 	}
 
 	body += fmt.Sprintf("\n\nWe've also forwarded your email to %s so they can follow up with you when they get a chance.", user.FirstName)
-	body += fmt.Sprintf("\n\nBy the way, if you're ever looking to increase your own leads and sales from networking events like %s, did you know that you can make your own Glimpz profile for free right now? Glimpz makes it easy for you to connect with other professionals at networking events and convert them into long-lasting business partners or clients. Check it out at %s?referral=uide-%s", user.FirstName, c.siteBaseUrl, user.Id)
+	body += fmt.Sprintf("\n\nBy the way, if you want to boost your own leads and sales from networking events like %s, Glimpz makes it easy for you to connect and follow up with professionals at in-person networking events, helping you build long-lasting relationships. Try it for free now! %s?referral=uide-%s", user.FirstName, c.siteBaseUrl, user.Id)
 
 	body += "\n\nWarm regards,\nBen"
 
