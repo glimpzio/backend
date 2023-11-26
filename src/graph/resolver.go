@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/connections"
 	"github.com/glimpzio/backend/misc"
 	"github.com/glimpzio/backend/profile"
@@ -14,4 +15,6 @@ type Resolver struct {
 	Logger            *misc.Logger
 	ProfileService    *profile.ProfileService
 	ConnectionService *connections.ConnectionService
+	Auth0Config       *auth.Auth0Config
+	Domain            string
 }

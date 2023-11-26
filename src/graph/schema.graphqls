@@ -42,6 +42,7 @@ type EmailConnection {
 }
 
 type Query {
+    exchangeAuthCode(code: String!): Boolean!
     user: User!
     invite(id: ID!): Invite!
     emailConnections: [EmailConnection!]!

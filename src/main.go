@@ -21,19 +21,21 @@ type environment struct {
 	Auth0ClientId           string `json:"AUTH0_CLIENT_ID"`
 	Auth0ClientSecret       string `json:"AUTH0_CLIENT_SECRET"`
 	Auth0AudienceApi        string `json:"AUTH0_AUDIENCE_API"`
+	Auth0RedirectUrl        string `json:"AUTH0_REDIRECT_URL"`
 	SendgridApiKey          string `json:"SENDGRID_API_KEY"`
 	SendgridListIdAccount   string `json:"SENDGRID_LIST_ID_ACCOUNT"`
 	SendgridListIdMarketing string `json:"SENDGRID_LIST_ID_MARKETING"`
 	SendgridSenderName      string `json:"SENDGRID_SENDER_NAME"`
 	SendgridSenderEmail     string `json:"SENDGRID_SENDER_EMAIL"`
 	SiteBaseUrl             string `json:"SITE_BASE_URL"`
+	Domain                  string `json:"DOMAIN"`
 }
 
 const defaultPort = "8080"
 
-func graphqlHandler(logger *misc.Logger, auth0Config *auth.Auth0Config, resolver *graph.Resolver) gin.HandlerFunc {
+func graphqlHandler(logger *misc.Logger, auth0Config *auth.Auth0Config, domain string, resolver *graph.Resolver) gin.HandlerFunc {
 	h := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
-	wrapped := auth.ApplyMiddleware(logger, h, auth0Config)
+	wrapped := auth.ApplyMiddleware(logger, h, auth0Config, domain)
 
 	return func(c *gin.Context) {
 		wrapped.ServeHTTP(c.Writer, c.Request)
@@ -78,6 +80,7 @@ func main() {
 		Auth0ClientId:     env.Auth0ClientId,
 		Auth0ClientSecret: env.Auth0ClientSecret,
 		Auth0AudienceApi:  env.Auth0AudienceApi,
+		Auth0RedirectUrl:  env.Auth0RedirectUrl,
 	}
 
 	mailList := misc.NewMailList(env.SendgridApiKey, env.SendgridSenderName, env.SendgridSenderEmail, env.SendgridListIdAccount, env.SendgridListIdMarketing)
@@ -90,12 +93,12 @@ func main() {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{env.SiteBaseUrl},
 		AllowMethods:     []string{"GET", "POST"},
-		AllowHeaders:     []string{"Authorization", "Content-Type"},
+		AllowHeaders:     []string{"Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
 	r.Use(misc.GinContextToContextMiddleware())
-	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{Logger: logger, ProfileService: profileService, ConnectionService: connectionService}))
+	r.POST("/query", graphqlHandler(logger, auth0Config, env.Domain, &graph.Resolver{Logger: logger, ProfileService: profileService, ConnectionService: connectionService, Auth0Config: auth0Config, Domain: env.Domain}))
 	r.GET("/", playgroundHandler())
 
 	logger.InfoLog.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
