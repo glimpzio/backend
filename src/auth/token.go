@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -40,6 +41,10 @@ func ExchangeAuthCode(auth0Config *Auth0Config, code string) (*token, error) {
 	}
 	defer res.Body.Close()
 
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		return nil, errors.New("failed to authorize")
+	}
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
@@ -67,8 +72,12 @@ func RefreshToken(auth0Config *Auth0Config, refreshToken string) (*token, error)
 	if err != nil {
 		return nil, err
 	}
-
 	defer res.Body.Close()
+
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		return nil, errors.New("failed to authorize")
+	}
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
