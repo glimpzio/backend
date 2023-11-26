@@ -12,7 +12,6 @@ import * as route53 from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as rds from "aws-cdk-lib/aws-rds";
-import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 
 export class AwsStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -36,27 +35,14 @@ export class AwsStack extends cdk.Stack {
         // Database
         const PORT = 5432;
 
-        const dbCluster = new rds.DatabaseCluster(this, "appDbCluster", {
-            engine: rds.DatabaseClusterEngine.auroraPostgres({
-                version: rds.AuroraPostgresEngineVersion.VER_14_4,
+        const dbCluster = new rds.DatabaseInstance(this, "appDbCluster", {
+            engine: rds.DatabaseInstanceEngine.postgres({
+                version: rds.PostgresEngineVersion.VER_14_4,
             }),
-            instances: 1,
-            instanceProps: {
-                vpc,
-                instanceType: new ec2.InstanceType("serverless"),
-            },
+            vpc,
+            credentials: rds.Credentials.fromGeneratedSecret("postgres"),
+            instanceType: new ec2.InstanceType("db.t3.micro"),
             port: PORT,
-        });
-
-        cdk.Aspects.of(dbCluster).add({
-            visit(node) {
-                if (node instanceof rds.CfnDBCluster) {
-                    node.serverlessV2ScalingConfiguration = {
-                        minCapacity: 0.5,
-                        maxCapacity: 1,
-                    };
-                }
-            },
         });
 
         const bastion = new ec2.BastionHostLinux(this, "appBastionHost", {
