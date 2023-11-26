@@ -41,7 +41,7 @@ export class AwsStack extends cdk.Stack {
             }),
             vpc,
             credentials: rds.Credentials.fromGeneratedSecret("postgres"),
-            instanceType: new ec2.InstanceType("db.t3.micro"),
+            instanceType: new ec2.InstanceType("t3.micro"),
             port: PORT,
         });
 
