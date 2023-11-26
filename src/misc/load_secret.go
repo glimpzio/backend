@@ -37,14 +37,14 @@ func LoadSecret(secretName string, store interface{}) error {
 }
 
 type databaseSecret struct {
-	DbClusterIdentifier string `json:"dbClusterIdentifier"`
-	Password            string `json:"password"`
-	Engine              string `json:"engine"`
-	Port                int    `json:"port"`
-	Host                string `json:"host"`
-	Username            string `json:"username"`
-	Database            string `json:"database"`
-	SSLMode             string `json:"sslmode"`
+	DbInstanceIdentifier string `json:"dbInstanceIdentifier"`
+	Password             string `json:"password"`
+	Engine               string `json:"engine"`
+	Port                 int    `json:"port"`
+	Host                 string `json:"host"`
+	Username             string `json:"username"`
+	Database             string `json:"database"`
+	SSLMode              string `json:"sslmode"`
 }
 
 // Load database from secret
