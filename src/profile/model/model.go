@@ -3,6 +3,8 @@ package model
 import (
 	"database/sql"
 	"time"
+
+	"github.com/glimpzio/backend/misc"
 )
 
 type Model struct {
@@ -98,7 +100,7 @@ func (m *Model) GetUserByAuthId(authId string) (*User, error) {
 func (m *Model) CreateInvite(userId string, expiresAt time.Time) (*Invite, error) {
 	invite := &Invite{}
 
-	err := m.WriteDb.QueryRow("INSERT INTO invites (user_id, expires_at) VALUES ($1, $2) RETURNING id, user_id, expires_at", userId, expiresAt).
+	err := m.WriteDb.QueryRow("INSERT INTO invites (user_id, expires_at) VALUES ($1, $2) RETURNING id, user_id, expires_at", userId, misc.FormatTime(expiresAt)).
 		Scan(&invite.Id, &invite.UserId, &invite.ExpiresAt)
 	if err != nil {
 		return nil, err

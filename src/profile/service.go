@@ -114,7 +114,8 @@ func (p *ProfileService) GetUserByAuthId(authId string) (*User, error) {
 
 // Create a new invite
 func (p *ProfileService) CreateInvite(userId string) (*Invite, error) {
-	expiresAt := time.Time.Add(time.Now(), time.Duration(time.Duration.Hours(24)))
+	currentTime := time.Now()
+	expiresAt := currentTime.Add(24 * time.Hour)
 
 	rawInvite, err := p.model.CreateInvite(userId, expiresAt)
 	if err != nil {
