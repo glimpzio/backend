@@ -33,13 +33,6 @@ export class AwsStack extends cdk.Stack {
 
         const secret = new secretsmanager.Secret(this, "appSecret");
 
-        const taskExecRole = new Role(this, "appTaskExecRole", {
-            assumedBy: new ServicePrincipal("ecs-tasks.amazonaws.com"),
-        });
-
-        taskExecRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonECSTaskExecutionRolePolicy"));
-        secret.grantRead(taskExecRole);
-
         // Database
         const PORT = 5432;
 
@@ -66,8 +59,6 @@ export class AwsStack extends cdk.Stack {
             },
         });
 
-        dbCluster.secret!.grantRead(taskExecRole);
-
         const bastion = new ec2.BastionHostLinux(this, "appBastionHost", {
             vpc,
         });
@@ -78,8 +69,10 @@ export class AwsStack extends cdk.Stack {
         const taskDefinition = new ecs.FargateTaskDefinition(this, "appTaskDefinition", {
             cpu: 256,
             memoryLimitMiB: 512,
-            executionRole: taskExecRole,
         });
+
+        secret.grantRead(taskDefinition.taskRole);
+        dbCluster.secret!.grantRead(taskDefinition.taskRole);
 
         taskDefinition.addContainer("appContainer", {
             image: ecs.ContainerImage.fromEcrRepository(ecrRepo, "latest"),
