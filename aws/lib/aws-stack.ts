@@ -18,13 +18,14 @@ export class AwsStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        // Define runtime infrastructure
+        // Misc
         const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, "appDomain", { zoneName: this.node.getContext("hostedZoneName"), hostedZoneId: this.node.getContext("hostedZoneId") });
 
         const ecrRepo = new ecr.Repository(this, "appEcrRepo", {
             repositoryName: "glimpz",
         });
 
+        // Network
         const vpc = new ec2.Vpc(this, "appVpc", {
             ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
             natGateways: 1,
@@ -67,11 +68,13 @@ export class AwsStack extends cdk.Stack {
 
         dbCluster.secret!.grantRead(taskExecRole);
 
-        // Setup bastion host
-        new ec2.BastionHostLinux(this, "appBastionHost", {
+        const bastion = new ec2.BastionHostLinux(this, "appBastionHost", {
             vpc,
         });
 
+        dbCluster.connections.allowDefaultPortFrom(bastion);
+
+        // Setup ECS cluster
         const taskDefinition = new ecs.FargateTaskDefinition(this, "appTaskDefinition", {
             cpu: 256,
             memoryLimitMiB: 512,
