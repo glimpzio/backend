@@ -126,8 +126,15 @@ func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, 
 	}, nil
 }
 
-// ExchangeAuthCode is the resolver for the exchangeAuthCode field.
-func (r *queryResolver) ExchangeAuthCode(ctx context.Context, code string) (bool, error) {
+// Authenticated is the resolver for the authenticated field.
+func (r *queryResolver) Authenticated(ctx context.Context) (bool, error) {
+	middleware := auth.GetMiddleware(ctx)
+
+	return middleware.Token != nil, nil
+}
+
+// Authenticate is the resolver for the authenticate field.
+func (r *queryResolver) Authenticate(ctx context.Context, code string) (bool, error) {
 	gc, err := misc.GinContextFromContext(ctx)
 	if err != nil {
 		return false, err
