@@ -7,6 +7,7 @@ package graph
 import (
 	"context"
 	"math"
+	"net/http"
 
 	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/graph/model"
@@ -137,6 +138,7 @@ func (r *queryResolver) ExchangeAuthCode(ctx context.Context, code string) (bool
 		return false, err
 	}
 
+	gc.SetSameSite(http.SameSiteStrictMode)
 	gc.SetCookie(auth.ACCESS_TOKEN_COOKIE, tkn.AccessToken, tkn.ExpiresIn, "/", r.Domain, true, true)
 	gc.SetCookie(auth.REFRESH_TOKEN_COOKIE, tkn.RefreshToken, math.MaxInt, "/", r.Domain, true, true)
 

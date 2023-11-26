@@ -108,6 +108,7 @@ func ApplyMiddleware(logger *misc.Logger, next http.Handler, config *Auth0Config
 						if err != nil {
 							next.ServeHTTP(w, r)
 						} else {
+							gc.SetSameSite(http.SameSiteStrictMode)
 							gc.SetCookie(ACCESS_TOKEN_COOKIE, tkn.AccessToken, tkn.ExpiresIn, "/", domain, true, true)
 							gc.SetCookie(REFRESH_TOKEN_COOKIE, tkn.RefreshToken, math.MaxInt, "/", domain, true, true)
 
