@@ -82,12 +82,16 @@ func (c *ConnectionService) ConnectByEmail(inviteId string, email string, subscr
 }
 
 // Upsert a custom connection
-func (c *ConnectionService) UpsertCustomConnection(userId string, id *string, customConnection *NewCustomConnection) (*CustomConnection, error) {
+func (c *ConnectionService) UpsertCustomConnection(userId string, id *string, newCustomConnection *NewCustomConnection) (*CustomConnection, error) {
 	var rawConnection *model.CustomConnection
-	var err error
 
 	if id == nil {
-		rawConnection, err = c.model.CreateCustomConnection(userId, customConnection.FirstName, customConnection.LastName, customConnection.Notes, customConnection.Email, customConnection.Phone, customConnection.Website, customConnection.LinkedIn)
+		connection, err := c.model.CreateCustomConnection(userId, newCustomConnection.FirstName, newCustomConnection.LastName, newCustomConnection.Notes, newCustomConnection.Email, newCustomConnection.Phone, newCustomConnection.Website, newCustomConnection.LinkedIn)
+		if err != nil {
+			return nil, err
+		}
+
+		rawConnection = connection
 	} else {
 		existing, err := c.model.GetCustomConnection(*id)
 
@@ -97,11 +101,12 @@ func (c *ConnectionService) UpsertCustomConnection(userId string, id *string, cu
 			return nil, ErrNotAuthorized
 		}
 
-		rawConnection, err = c.model.UpdateCustomConnection(*id, customConnection.FirstName, customConnection.LastName, customConnection.Notes, customConnection.Email, customConnection.Phone, customConnection.Website, customConnection.LinkedIn)
-	}
+		connection, err := c.model.UpdateCustomConnection(*id, newCustomConnection.FirstName, newCustomConnection.LastName, newCustomConnection.Notes, newCustomConnection.Email, newCustomConnection.Phone, newCustomConnection.Website, newCustomConnection.LinkedIn)
+		if err != nil {
+			return nil, err
+		}
 
-	if err != nil {
-		return nil, err
+		rawConnection = connection
 	}
 
 	return &CustomConnection{
@@ -144,6 +149,8 @@ func (c *ConnectionService) GetCustomConnection(id string) (*CustomConnection, e
 	rawConnection, err := c.model.GetCustomConnection(id)
 	if err != nil {
 		return nil, err
+	} else if rawConnection == nil {
+		return nil, ErrDoesNotExist
 	}
 
 	return &CustomConnection{

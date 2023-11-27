@@ -19,9 +19,8 @@ func NewProfileService(readDb *sql.DB, writeDb *sql.DB, mailList *misc.MailList)
 }
 
 // Upsert a user
-func (p *ProfileService) UpsertUser(authId string, user *NewUser) (*User, error) {
+func (p *ProfileService) UpsertUser(authId string, newUser *NewUser) (*User, error) {
 	var rawUser *model.User
-	var err error
 
 	existing, err := p.model.GetUserByAuthId(authId)
 	if err != nil {
@@ -29,18 +28,23 @@ func (p *ProfileService) UpsertUser(authId string, user *NewUser) (*User, error)
 	}
 
 	if existing == nil {
-		rawUser, err = p.model.CreateUser(authId, user.FirstName, user.LastName, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.LinkedIn)
+		user, err := p.model.CreateUser(authId, newUser.FirstName, newUser.LastName, newUser.PersonalEmail, newUser.Bio, newUser.ProfilePicture, newUser.Profile.Email, newUser.Profile.Phone, newUser.Profile.Website, newUser.Profile.LinkedIn)
 		if err != nil {
 			return nil, err
 		}
 
-		err = p.mailList.AddAccount(user.PersonalEmail, user.FirstName, user.LastName)
-	} else {
-		rawUser, err = p.model.UpdateUser(existing.Id, user.FirstName, user.LastName, user.PersonalEmail, user.Bio, user.ProfilePicture, user.Profile.Email, user.Profile.Phone, user.Profile.Website, user.Profile.LinkedIn)
-	}
+		rawUser = user
 
-	if err != nil {
-		return nil, err
+		if err := p.mailList.AddAccount(newUser.PersonalEmail, newUser.FirstName, newUser.LastName); err != nil {
+			return nil, err
+		}
+	} else {
+		user, err := p.model.UpdateUser(existing.Id, newUser.FirstName, newUser.LastName, newUser.PersonalEmail, newUser.Bio, newUser.ProfilePicture, newUser.Profile.Email, newUser.Profile.Phone, newUser.Profile.Website, newUser.Profile.LinkedIn)
+		if err != nil {
+			return nil, err
+		}
+
+		rawUser = user
 	}
 
 	return &User{
@@ -50,7 +54,7 @@ func (p *ProfileService) UpsertUser(authId string, user *NewUser) (*User, error)
 		LastName:       rawUser.LastName,
 		Email:          rawUser.PersonalEmail,
 		Bio:            rawUser.Bio,
-		ProfilePicture: user.ProfilePicture,
+		ProfilePicture: rawUser.ProfilePicture,
 		Profile: &Profile{
 			Email:    rawUser.Email,
 			Phone:    rawUser.Phone,

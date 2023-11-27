@@ -27,7 +27,7 @@ func (m *Model) CreateCustomConnection(userId string, firstName *string, lastNam
 func (m *Model) UpdateCustomConnection(id string, firstName *string, lastName *string, notes *string, email *string, phone *string, website *string, linkedin *string) (*CustomConnection, error) {
 	customConnection := &CustomConnection{}
 
-	err := m.WriteDb.QueryRow("UPDATE custom_connections SET first_name = $1, last_name = $2, notes = $3, email = $4, phone = $5, website = $6, linkedin = $7) WHERE id = $8 RETURNING id, user_id, connected_at, first_name, last_name, notes, email, phone, website, linkedin",
+	err := m.WriteDb.QueryRow("UPDATE custom_connections SET first_name = $1, last_name = $2, notes = $3, email = $4, phone = $5, website = $6, linkedin = $7 WHERE id = $8 RETURNING id, user_id, connected_at, first_name, last_name, notes, email, phone, website, linkedin",
 		firstName, lastName, notes, email, phone, website, linkedin, id).
 		Scan(&customConnection.Id, &customConnection.UserId, &customConnection.ConnectedAt, &customConnection.FirstName, &customConnection.LastName, &customConnection.Notes, &customConnection.Email, &customConnection.Phone, &customConnection.Website, &customConnection.LinkedIn)
 	if err != nil {
@@ -57,6 +57,10 @@ func (m *Model) GetCustomConnection(id string) (*CustomConnection, error) {
 	err := m.ReadDb.QueryRow("SELECT id, user_id, connected_at, first_name, last_name, notes, email, phone, website, linkedin FROM custom_connections WHERE id = $1", id).
 		Scan(&customConnection.Id, &customConnection.UserId, &customConnection.ConnectedAt, &customConnection.FirstName, &customConnection.LastName, &customConnection.Notes, &customConnection.Email, &customConnection.Phone, &customConnection.Website, &customConnection.LinkedIn)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 

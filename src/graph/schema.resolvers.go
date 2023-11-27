@@ -6,9 +6,9 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/glimpzio/backend/auth"
+	"github.com/glimpzio/backend/connections"
 	"github.com/glimpzio/backend/graph/model"
 	"github.com/glimpzio/backend/profile"
 )
@@ -132,9 +132,47 @@ func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, 
 
 // UpsertCustomConnection is the resolver for the upsertCustomConnection field.
 func (r *mutationResolver) UpsertCustomConnection(ctx context.Context, id *string, customConnection model.NewCustomConnection) (*model.CustomConnection, error) {
-	// **** Need to get the upsert working !!!!
+	middleware := auth.GetMiddleware(ctx)
+	if middleware.Token == nil {
+		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
 
-	panic(fmt.Errorf("not implemented: UpsertCustomConnection - upsertCustomConnection"))
+		return nil, ErrMissingAuthHeader
+	}
+
+	user, err := r.ProfileService.GetUserByAuthId(middleware.Token.AuthId)
+	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
+		return nil, ErrGetResourceFailed
+	}
+
+	rawConnection, err := r.ConnectionService.UpsertCustomConnection(user.Id, id, &connections.NewCustomConnection{
+		FirstName: customConnection.FirstName,
+		LastName:  customConnection.LastName,
+		Notes:     customConnection.Notes,
+		Email:     customConnection.Email,
+		Phone:     customConnection.Phone,
+		Website:   customConnection.Website,
+		LinkedIn:  customConnection.Linkedin,
+	})
+	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
+		return nil, ErrOperationFailed
+	}
+
+	return &model.CustomConnection{
+		ID:          rawConnection.Id,
+		UserID:      rawConnection.UserId,
+		ConnectedAt: int(rawConnection.ConnectedAt.Unix()),
+		FirstName:   rawConnection.FirstName,
+		LastName:    rawConnection.LastName,
+		Notes:       rawConnection.Notes,
+		Email:       rawConnection.Email,
+		Phone:       rawConnection.Phone,
+		Website:     rawConnection.Website,
+		Linkedin:    rawConnection.LinkedIn,
+	}, nil
 }
 
 // DeleteCustomConnection is the resolver for the deleteCustomConnection field.
