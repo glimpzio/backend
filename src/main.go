@@ -19,9 +19,7 @@ import (
 type environment struct {
 	Auth0Domain             string `json:"AUTH0_DOMAIN"`
 	Auth0ClientId           string `json:"AUTH0_CLIENT_ID"`
-	Auth0ClientSecret       string `json:"AUTH0_CLIENT_SECRET"`
 	Auth0AudienceApi        string `json:"AUTH0_AUDIENCE_API"`
-	Auth0RedirectUrl        string `json:"AUTH0_REDIRECT_URL"`
 	SendgridApiKey          string `json:"SENDGRID_API_KEY"`
 	SendgridListIdAccount   string `json:"SENDGRID_LIST_ID_ACCOUNT"`
 	SendgridListIdMarketing string `json:"SENDGRID_LIST_ID_MARKETING"`
@@ -75,11 +73,9 @@ func main() {
 	defer db.Close()
 
 	auth0Config := &auth.Auth0Config{
-		Auth0Domain:       env.Auth0Domain,
-		Auth0ClientId:     env.Auth0ClientId,
-		Auth0ClientSecret: env.Auth0ClientSecret,
-		Auth0AudienceApi:  env.Auth0AudienceApi,
-		Auth0RedirectUrl:  env.Auth0RedirectUrl,
+		Auth0Domain:      env.Auth0Domain,
+		Auth0ClientId:    env.Auth0ClientId,
+		Auth0AudienceApi: env.Auth0AudienceApi,
 	}
 
 	mailList := misc.NewMailList(env.SendgridApiKey, env.SendgridSenderName, env.SendgridSenderEmail, env.SendgridListIdAccount, env.SendgridListIdMarketing)

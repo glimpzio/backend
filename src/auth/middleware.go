@@ -39,11 +39,9 @@ func GetMiddleware(ctx context.Context) *Middleware {
 }
 
 type Auth0Config struct {
-	Auth0Domain       string
-	Auth0ClientId     string
-	Auth0ClientSecret string
-	Auth0AudienceApi  string
-	Auth0RedirectUrl  string
+	Auth0Domain      string
+	Auth0ClientId    string
+	Auth0AudienceApi string
 }
 
 // Verify a token
