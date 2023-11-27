@@ -2,11 +2,17 @@
 
 package model
 
-type EmailConnection struct {
-	ID          string `json:"id"`
-	UserID      string `json:"userId"`
-	Email       string `json:"email"`
-	ConnectedAt int    `json:"connectedAt"`
+type CustomConnection struct {
+	ID          string  `json:"id"`
+	UserID      string  `json:"userId"`
+	ConnectedAt int     `json:"connectedAt"`
+	FirstName   *string `json:"firstName,omitempty"`
+	LastName    *string `json:"lastName,omitempty"`
+	Notes       *string `json:"notes,omitempty"`
+	Email       *string `json:"email,omitempty"`
+	Phone       *string `json:"phone,omitempty"`
+	Website     *string `json:"website,omitempty"`
+	Linkedin    *string `json:"linkedin,omitempty"`
 }
 
 type Invite struct {
@@ -14,6 +20,16 @@ type Invite struct {
 	UserID        string         `json:"userId"`
 	ExpiresAt     int            `json:"expiresAt"`
 	PublicProfile *PublicProfile `json:"publicProfile"`
+}
+
+type NewCustomConnection struct {
+	FirstName *string `json:"firstName,omitempty"`
+	LastName  *string `json:"lastName,omitempty"`
+	Notes     *string `json:"notes,omitempty"`
+	Email     *string `json:"email,omitempty"`
+	Phone     *string `json:"phone,omitempty"`
+	Website   *string `json:"website,omitempty"`
+	Linkedin  *string `json:"linkedin,omitempty"`
 }
 
 type NewProfile struct {

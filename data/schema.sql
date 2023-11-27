@@ -25,10 +25,16 @@ CREATE TABLE invites (
 );
 
 -- Connections service
-CREATE TABLE email_connections (
+CREATE TABLE custom_connections (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     -- Upon migrating to microservices remove "user_id" as a forein key
     user_id UUID NOT NULL references users(id) ON DELETE CASCADE,
-    email TEXT NOT NULL,
-    connected_at TIMESTAMP NOT NULL DEFAULT NOW()
+    connected_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    first_name TEXT,
+    last_name TEXT,
+    notes TEXT,
+    email TEXT,
+    phone TEXT,
+    website TEXT,
+    linkedin TEXT
 );

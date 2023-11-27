@@ -34,17 +34,24 @@ type Invite {
     publicProfile: PublicProfile!
 }
 
-type EmailConnection {
+type CustomConnection {
     id: ID!
     userId: ID!
-    email: String!
     connectedAt: Int!
+    firstName: String
+    lastName: String
+    notes: String
+    email: String
+    phone: String
+    website: String
+    linkedin: String
 }
 
 type Query {
     user: User!
     invite(id: ID!): Invite!
-    emailConnections: [EmailConnection!]!
+    customConnection(id: ID!): CustomConnection!
+    customConnections: [CustomConnection!]!
 }
 
 input NewProfile {
@@ -63,8 +70,20 @@ input NewUser {
     profile: NewProfile!
 }
 
+input NewCustomConnection {
+    firstName: String
+    lastName: String
+    notes: String
+    email: String
+    phone: String
+    website: String
+    linkedin: String
+}
+
 type Mutation {
   upsertUser(input: NewUser!): User!
   createInvite: Invite!
-  connectByEmail(inviteId: ID!, email: String!, subscribe: Boolean!): EmailConnection!
+  connectByEmail(inviteId: ID!, email: String!, subscribe: Boolean!): CustomConnection!
+  upsertCustomConnection(id: ID, customConnection: NewCustomConnection!): CustomConnection!
+  deleteCustomConnection(id: ID!): CustomConnection!
 }

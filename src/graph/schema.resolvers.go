@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/graph/model"
@@ -105,21 +106,84 @@ func (r *mutationResolver) CreateInvite(ctx context.Context) (*model.Invite, err
 }
 
 // ConnectByEmail is the resolver for the connectByEmail field.
-func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, email string, subscribe bool) (*model.EmailConnection, error) {
-	emailConnection, err := r.ConnectionService.ConnectByEmail(inviteID, email, subscribe)
+func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, email string, subscribe bool) (*model.CustomConnection, error) {
+	rawConnection, err := r.ConnectionService.ConnectByEmail(inviteID, email, subscribe)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
 		return nil, ErrOperationFailed
 	}
 
-	r.Logger.InfoLog.Printf("connected by email for invite %s", inviteID)
+	r.Logger.InfoLog.Printf("created custom connection from email for invite %s", inviteID)
 
-	return &model.EmailConnection{
-		ID:          emailConnection.Id,
-		UserID:      emailConnection.UserId,
-		Email:       emailConnection.Email,
-		ConnectedAt: int(emailConnection.ConnectedAt.Unix()),
+	return &model.CustomConnection{
+		ID:          rawConnection.Id,
+		UserID:      rawConnection.UserId,
+		ConnectedAt: int(rawConnection.ConnectedAt.Unix()),
+		FirstName:   rawConnection.FirstName,
+		LastName:    rawConnection.LastName,
+		Notes:       rawConnection.Notes,
+		Email:       rawConnection.Email,
+		Phone:       rawConnection.Phone,
+		Website:     rawConnection.Website,
+		Linkedin:    rawConnection.LinkedIn,
+	}, nil
+}
+
+// UpsertCustomConnection is the resolver for the upsertCustomConnection field.
+func (r *mutationResolver) UpsertCustomConnection(ctx context.Context, id *string, customConnection model.NewCustomConnection) (*model.CustomConnection, error) {
+	// **** Need to get the upsert working !!!!
+
+	panic(fmt.Errorf("not implemented: UpsertCustomConnection - upsertCustomConnection"))
+}
+
+// DeleteCustomConnection is the resolver for the deleteCustomConnection field.
+func (r *mutationResolver) DeleteCustomConnection(ctx context.Context, id string) (*model.CustomConnection, error) {
+	middleware := auth.GetMiddleware(ctx)
+	if middleware.Token == nil {
+		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
+
+		return nil, ErrMissingAuthHeader
+	}
+
+	rawConnection, err := r.ConnectionService.GetCustomConnection(id)
+	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
+		return nil, ErrGetResourceFailed
+	}
+
+	user, err := r.ProfileService.GetUserById(rawConnection.UserId)
+	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
+		return nil, ErrGetResourceFailed
+	}
+
+	if user.AuthId != middleware.Token.AuthId {
+		r.Logger.ErrorLog.Println(ErrNotAuthorized)
+
+		return nil, ErrNotAuthorized
+	}
+
+	rawConnection, err = r.ConnectionService.DeleteCustomConnection(id)
+	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
+		return nil, ErrOperationFailed
+	}
+
+	return &model.CustomConnection{
+		ID:          rawConnection.Id,
+		UserID:      rawConnection.UserId,
+		ConnectedAt: int(rawConnection.ConnectedAt.Unix()),
+		FirstName:   rawConnection.FirstName,
+		LastName:    rawConnection.LastName,
+		Notes:       rawConnection.Notes,
+		Email:       rawConnection.Email,
+		Phone:       rawConnection.Phone,
+		Website:     rawConnection.Website,
+		Linkedin:    rawConnection.LinkedIn,
 	}, nil
 }
 
@@ -187,8 +251,51 @@ func (r *queryResolver) Invite(ctx context.Context, id string) (*model.Invite, e
 	}, nil
 }
 
-// EmailConnections is the resolver for the emailConnections field.
-func (r *queryResolver) EmailConnections(ctx context.Context) ([]*model.EmailConnection, error) {
+// CustomConnection is the resolver for the customConnection field.
+func (r *queryResolver) CustomConnection(ctx context.Context, id string) (*model.CustomConnection, error) {
+	middleware := auth.GetMiddleware(ctx)
+	if middleware.Token == nil {
+		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
+
+		return nil, ErrMissingAuthHeader
+	}
+
+	rawConnection, err := r.ConnectionService.GetCustomConnection(id)
+	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
+		return nil, ErrGetResourceFailed
+	}
+
+	user, err := r.ProfileService.GetUserById(rawConnection.UserId)
+	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
+		return nil, ErrGetResourceFailed
+	}
+
+	if user.AuthId != middleware.Token.AuthId {
+		r.Logger.ErrorLog.Println(ErrNotAuthorized)
+
+		return nil, ErrNotAuthorized
+	}
+
+	return &model.CustomConnection{
+		ID:          rawConnection.Id,
+		UserID:      rawConnection.UserId,
+		ConnectedAt: int(rawConnection.ConnectedAt.Unix()),
+		FirstName:   rawConnection.FirstName,
+		LastName:    rawConnection.LastName,
+		Notes:       rawConnection.Notes,
+		Email:       rawConnection.Email,
+		Phone:       rawConnection.Phone,
+		Website:     rawConnection.Website,
+		Linkedin:    rawConnection.LinkedIn,
+	}, nil
+}
+
+// CustomConnections is the resolver for the customConnections field.
+func (r *queryResolver) CustomConnections(ctx context.Context) ([]*model.CustomConnection, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
 		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
@@ -205,26 +312,33 @@ func (r *queryResolver) EmailConnections(ctx context.Context) ([]*model.EmailCon
 
 	r.Logger.InfoLog.Printf("retrieved data for user %s", user.Id)
 
-	rawEmailConnections, err := r.ConnectionService.GetEmailConnections(user.Id)
+	rawConnections, err := r.ConnectionService.GetCustomConnections(user.Id)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
 		return nil, ErrGetResourceFailed
 	}
 
-	r.Logger.InfoLog.Printf("retrieved email connections for user %s", user.Id)
+	r.Logger.InfoLog.Printf("retrieved connections for user %s", user.Id)
 
-	emailConnections := []*model.EmailConnection{}
-	for _, rawEmailConnection := range rawEmailConnections {
-		emailConnections = append(emailConnections, &model.EmailConnection{
-			ID:          rawEmailConnection.Id,
-			UserID:      rawEmailConnection.UserId,
-			Email:       rawEmailConnection.Email,
-			ConnectedAt: int(rawEmailConnection.ConnectedAt.Unix()),
+	connections := []*model.CustomConnection{}
+
+	for _, rawConnection := range rawConnections {
+		connections = append(connections, &model.CustomConnection{
+			ID:          rawConnection.Id,
+			UserID:      rawConnection.UserId,
+			ConnectedAt: int(rawConnection.ConnectedAt.Unix()),
+			FirstName:   rawConnection.FirstName,
+			LastName:    rawConnection.LastName,
+			Notes:       rawConnection.Notes,
+			Email:       rawConnection.Email,
+			Phone:       rawConnection.Phone,
+			Website:     rawConnection.Website,
+			Linkedin:    rawConnection.LinkedIn,
 		})
 	}
 
-	return emailConnections, nil
+	return connections, nil
 }
 
 // Mutation returns MutationResolver implementation.
