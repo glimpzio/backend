@@ -16,5 +16,4 @@ type Resolver struct {
 	ProfileService    *profile.ProfileService
 	ConnectionService *connections.ConnectionService
 	Auth0Config       *auth.Auth0Config
-	Domain            string
 }

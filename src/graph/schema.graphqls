@@ -42,8 +42,6 @@ type EmailConnection {
 }
 
 type Query {
-    authenticated: Boolean!
-    authenticate(code: String!): Boolean!
     user: User!
     invite(id: ID!): Invite!
     emailConnections: [EmailConnection!]!

@@ -6,12 +6,9 @@ package graph
 
 import (
 	"context"
-	"math"
-	"net/http"
 
 	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/graph/model"
-	"github.com/glimpzio/backend/misc"
 	"github.com/glimpzio/backend/profile"
 )
 
@@ -124,32 +121,6 @@ func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, 
 		Email:       emailConnection.Email,
 		ConnectedAt: int(emailConnection.ConnectedAt.Unix()),
 	}, nil
-}
-
-// Authenticated is the resolver for the authenticated field.
-func (r *queryResolver) Authenticated(ctx context.Context) (bool, error) {
-	middleware := auth.GetMiddleware(ctx)
-
-	return middleware.Token != nil, nil
-}
-
-// Authenticate is the resolver for the authenticate field.
-func (r *queryResolver) Authenticate(ctx context.Context, code string) (bool, error) {
-	gc, err := misc.GinContextFromContext(ctx)
-	if err != nil {
-		return false, err
-	}
-
-	tkn, err := auth.ExchangeAuthCode(r.Auth0Config, code)
-	if err != nil {
-		return false, err
-	}
-
-	gc.SetSameSite(http.SameSiteStrictMode)
-	gc.SetCookie(auth.ACCESS_TOKEN_COOKIE, tkn.AccessToken, tkn.ExpiresIn, "/", r.Domain, true, true)
-	gc.SetCookie(auth.REFRESH_TOKEN_COOKIE, tkn.RefreshToken, math.MaxInt, "/", r.Domain, true, true)
-
-	return true, nil
 }
 
 // User is the resolver for the user field.

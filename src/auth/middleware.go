@@ -3,9 +3,9 @@ package auth
 import (
 	"context"
 	"fmt"
-	"math"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/auth0/go-jwt-middleware/v2/jwks"
@@ -17,8 +17,12 @@ type contextKey string
 
 const authContextKey contextKey = "authKey"
 
+type AuthToken struct {
+	AuthId string
+}
+
 type Middleware struct {
-	Token *Token
+	Token *AuthToken
 }
 
 // Middleware resolver
@@ -28,7 +32,7 @@ func GetMiddleware(ctx context.Context) *Middleware {
 	token := ctx.Value(authContextKey)
 
 	if token != nil {
-		out.Token = token.(*Token)
+		out.Token = token.(*AuthToken)
 	}
 
 	return out
@@ -43,7 +47,7 @@ type Auth0Config struct {
 }
 
 // Verify a token
-func VerifyToken(ctx context.Context, accessToken string, config *Auth0Config) (*Token, error) {
+func VerifyToken(ctx context.Context, accessToken string, config *Auth0Config) (*AuthToken, error) {
 	issuerUrl, err := url.Parse(fmt.Sprintf("https://%s/", config.Auth0Domain))
 	if err != nil {
 		return nil, err
@@ -69,61 +73,33 @@ func VerifyToken(ctx context.Context, accessToken string, config *Auth0Config) (
 
 	claims := validated.(*validator.ValidatedClaims)
 
-	return &Token{AuthId: claims.RegisteredClaims.Subject, Expiry: claims.RegisteredClaims.Expiry}, nil
+	return &AuthToken{AuthId: claims.RegisteredClaims.Subject}, nil
 }
 
 // Apply middleware
-func ApplyMiddleware(logger *misc.Logger, next http.Handler, config *Auth0Config, domain string) http.Handler {
+func ApplyMiddleware(logger *misc.Logger, next http.Handler, config *Auth0Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gc, err := misc.GinContextFromContext(r.Context())
+		gc, _ := misc.GinContextFromContext(r.Context())
+		authHeader := gc.GetHeader(("Authorization"))
 
-		if err != nil {
+		if authHeader == "" {
 			next.ServeHTTP(w, r)
 		} else {
-			accessToken := ""
-			accessTokenCookie, err := gc.Cookie(ACCESS_TOKEN_COOKIE)
-			if err == nil {
-				accessToken = accessTokenCookie
-			}
+			tokenSplit := strings.Split(authHeader, " ")
 
-			refreshToken := ""
-			refreshTokenCookie, err := gc.Cookie(REFRESH_TOKEN_COOKIE)
-			if err == nil {
-				refreshToken = refreshTokenCookie
-			}
-
-			if accessToken == "" && refreshToken == "" {
+			if len(tokenSplit) != 2 {
 				next.ServeHTTP(w, r)
 			} else {
-				token, err := VerifyToken(r.Context(), accessToken, config)
+				token, err := VerifyToken(r.Context(), tokenSplit[1], config)
 
-				if err != nil {
-					tkn, err := RefreshToken(config, refreshToken)
-
-					if err != nil {
-						next.ServeHTTP(w, r)
-					} else {
-						token, err := VerifyToken(r.Context(), tkn.AccessToken, config)
-
-						if err != nil {
-							next.ServeHTTP(w, r)
-						} else {
-							gc.SetSameSite(http.SameSiteStrictMode)
-							gc.SetCookie(ACCESS_TOKEN_COOKIE, tkn.AccessToken, tkn.ExpiresIn, "/", domain, true, true)
-							gc.SetCookie(REFRESH_TOKEN_COOKIE, tkn.RefreshToken, math.MaxInt, "/", domain, true, true)
-
-							ctx := context.WithValue(r.Context(), authContextKey, token)
-
-							next.ServeHTTP(w, r.WithContext(ctx))
-						}
-					}
-				} else {
+				if err == nil {
 					ctx := context.WithValue(r.Context(), authContextKey, token)
 
 					next.ServeHTTP(w, r.WithContext(ctx))
+				} else {
+					next.ServeHTTP(w, r)
 				}
 			}
 		}
-
 	})
 }

@@ -28,14 +28,13 @@ type environment struct {
 	SendgridSenderName      string `json:"SENDGRID_SENDER_NAME"`
 	SendgridSenderEmail     string `json:"SENDGRID_SENDER_EMAIL"`
 	SiteBaseUrl             string `json:"SITE_BASE_URL"`
-	Domain                  string `json:"DOMAIN"`
 }
 
 const defaultPort = "8080"
 
-func graphqlHandler(logger *misc.Logger, auth0Config *auth.Auth0Config, domain string, resolver *graph.Resolver) gin.HandlerFunc {
+func graphqlHandler(logger *misc.Logger, auth0Config *auth.Auth0Config, resolver *graph.Resolver) gin.HandlerFunc {
 	h := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
-	wrapped := auth.ApplyMiddleware(logger, h, auth0Config, domain)
+	wrapped := auth.ApplyMiddleware(logger, h, auth0Config)
 
 	return func(c *gin.Context) {
 		wrapped.ServeHTTP(c.Writer, c.Request)
@@ -93,12 +92,12 @@ func main() {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{env.SiteBaseUrl},
 		AllowMethods:     []string{"GET", "POST"},
-		AllowHeaders:     []string{"Content-Type"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
 	r.Use(misc.GinContextToContextMiddleware())
-	r.POST("/query", graphqlHandler(logger, auth0Config, env.Domain, &graph.Resolver{Logger: logger, ProfileService: profileService, ConnectionService: connectionService, Auth0Config: auth0Config, Domain: env.Domain}))
+	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{Logger: logger, ProfileService: profileService, ConnectionService: connectionService, Auth0Config: auth0Config}))
 	r.GET("/", playgroundHandler())
 
 	logger.InfoLog.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
