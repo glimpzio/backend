@@ -13,12 +13,12 @@ type ConnectionService struct {
 	model          *model.Model
 	mailList       *misc.MailList
 	profileService *profile.ProfileService
-	siteBaseUrl    string
+	landingBaseUrl string
 }
 
 // Create a new profile service
-func NewConnectionService(readDb *sql.DB, writeDb *sql.DB, mailList *misc.MailList, profileService *profile.ProfileService, siteBaseUrl string) *ConnectionService {
-	return &ConnectionService{model: &model.Model{ReadDb: readDb, WriteDb: writeDb}, mailList: mailList, profileService: profileService, siteBaseUrl: siteBaseUrl}
+func NewConnectionService(readDb *sql.DB, writeDb *sql.DB, mailList *misc.MailList, profileService *profile.ProfileService, landingBaseUrl string) *ConnectionService {
+	return &ConnectionService{model: &model.Model{ReadDb: readDb, WriteDb: writeDb}, mailList: mailList, profileService: profileService, landingBaseUrl: landingBaseUrl}
 }
 
 // Connect the users by email signup
@@ -56,7 +56,7 @@ func (c *ConnectionService) ConnectByEmail(inviteId string, email string, subscr
 	}
 
 	body += fmt.Sprintf("\n\nWe've also forwarded your email to %s so they can follow up with you when they get a chance.", user.FirstName)
-	body += fmt.Sprintf("\n\nBy the way, if you want to boost your own leads and sales from networking events like %s, Glimpz makes it easy for you to connect and follow up with professionals at in-person networking events, helping you build long-lasting relationships. Try it for free now! %s?referral=uide-%s", user.FirstName, c.siteBaseUrl, user.Id)
+	body += fmt.Sprintf("\n\nBy the way, if you want to boost your own leads and sales from networking events like %s, Glimpz makes it easy for you to connect and follow up with professionals at in-person networking events, helping you build long-lasting relationships. Try it for free now! %s?referral=uide-%s", user.FirstName, c.landingBaseUrl, user.Id)
 
 	body += "\n\nWarm regards,\nBen"
 
