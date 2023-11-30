@@ -235,7 +235,18 @@ func (r *mutationResolver) UploadProfilePicture(ctx context.Context, file graphq
 		return "", ErrMissingAuthHeader
 	}
 
-	return r.ImageUploader.ResizeAndUploadFile(file.File, 400, 400, "PROFILE_PICTURE", middleware.Token.AuthId)
+	r.Logger.InfoLog.Println("received file from user")
+
+	path, err := r.ImageUploader.ResizeAndUploadFile(file.File, 400, 400, "PROFILE_PICTURE", middleware.Token.AuthId)
+	if err != nil {
+		r.Logger.ErrorLog.Println(err)
+
+		return "", ErrOperationFailed
+	}
+
+	r.Logger.InfoLog.Println("uploaded image")
+
+	return path, nil
 }
 
 // User is the resolver for the user field.

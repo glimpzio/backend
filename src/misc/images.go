@@ -2,6 +2,7 @@ package misc
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -9,7 +10,9 @@ import (
 	"image/jpeg"
 	"io"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
+	aws2 "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/disintegration/imaging"
@@ -54,7 +57,14 @@ func resizeAndCropImage(img *image.Image, width uint, height uint) image.Image {
 
 // Upload an image to S3
 func uploadImageS3(imageDomain string, prefix string, key string, bucketName string, img *image.Image) (string, error) {
-	sess, err := session.NewSession()
+	cfg, err := config.LoadDefaultConfig(context.Background())
+	if err != nil {
+		return "", nil
+	}
+
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws2.String(cfg.Region),
+	})
 	if err != nil {
 		return "", nil
 	}
@@ -75,8 +85,8 @@ func uploadImageS3(imageDomain string, prefix string, key string, bucketName str
 	bufferReader := bytes.NewReader(imageData)
 
 	_, err = s3Client.PutObject(&s3.PutObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(hashString),
+		Bucket: aws2.String(bucketName),
+		Key:    aws2.String(hashString),
 		Body:   bufferReader,
 	})
 
