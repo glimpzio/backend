@@ -17,11 +17,12 @@ import (
 )
 
 type ImageUploader struct {
-	bucketName string
+	bucketName  string
+	imageDomain string
 }
 
-func NewImageUploader(bucketName string) *ImageUploader {
-	return &ImageUploader{bucketName: bucketName}
+func NewImageUploader(bucketName string, imageDomain string) *ImageUploader {
+	return &ImageUploader{bucketName: bucketName, imageDomain: imageDomain}
 }
 
 // Decode an image
@@ -52,7 +53,7 @@ func resizeAndCropImage(img *image.Image, width uint, height uint) image.Image {
 }
 
 // Upload an image to S3
-func uploadImageS3(prefix string, key string, bucketName string, img *image.Image) (string, error) {
+func uploadImageS3(imageDomain string, prefix string, key string, bucketName string, img *image.Image) (string, error) {
 	sess, err := session.NewSession()
 	if err != nil {
 		return "", nil
@@ -83,7 +84,7 @@ func uploadImageS3(prefix string, key string, bucketName string, img *image.Imag
 		return "", err
 	}
 
-	return hashString, nil
+	return fmt.Sprintf("https://%s/%s", imageDomain, hashString), nil
 }
 
 // Upload a file
@@ -95,5 +96,5 @@ func (i *ImageUploader) ResizeAndUploadFile(reader io.Reader, width uint, height
 
 	edited := resizeAndCropImage(img, width, height)
 
-	return uploadImageS3(prefix, key, i.bucketName, &edited)
+	return uploadImageS3(i.imageDomain, prefix, key, i.bucketName, &edited)
 }

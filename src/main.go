@@ -75,7 +75,7 @@ func main() {
 
 	auth0Config := auth.NewAuth0Config(env.Auth0Domain, env.Auth0ClientId, env.Auth0AudienceApi)
 	mailList := misc.NewMailList(env.SendgridApiKey, env.SendgridSenderName, env.SendgridSenderEmail, env.SendgridListIdAccount, env.SendgridListIdMarketing)
-	imageUploader := misc.NewImageUploader(os.Getenv("IMAGE_BUCKET_NAME"))
+	imageUploader := misc.NewImageUploader(os.Getenv("IMAGE_BUCKET_NAME"), os.Getenv("IMAGE_DOMAIN"))
 
 	profileService := profile.NewProfileService(db, db, mailList)
 	connectionService := connections.NewConnectionService(db, db, mailList, profileService, env.LandingBaseUrl)

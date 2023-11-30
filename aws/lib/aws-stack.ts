@@ -41,7 +41,7 @@ export class AwsStack extends cdk.Stack {
             defaultBehavior: { origin: new origins.S3Origin(imageBucket) },
         });
 
-        // **** Add the image bucket to the ECS environment
+        // **** Add the image bucket to the ECS environment AND the cloudfront domain (with the prefix ???)
 
         // Database
         const PORT = 5432;
