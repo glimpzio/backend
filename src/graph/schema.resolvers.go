@@ -6,7 +6,9 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/connections"
 	"github.com/glimpzio/backend/graph/model"
@@ -223,6 +225,11 @@ func (r *mutationResolver) DeleteCustomConnection(ctx context.Context, id string
 		Website:     rawConnection.Website,
 		Linkedin:    rawConnection.LinkedIn,
 	}, nil
+}
+
+// UploadProfilePicture is the resolver for the uploadProfilePicture field.
+func (r *mutationResolver) UploadProfilePicture(ctx context.Context, file graphql.Upload) (string, error) {
+	panic(fmt.Errorf("not implemented: UploadProfilePicture - uploadProfilePicture"))
 }
 
 // User is the resolver for the user field.

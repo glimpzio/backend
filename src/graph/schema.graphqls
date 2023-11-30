@@ -2,6 +2,8 @@
 #
 # https://gqlgen.com/getting-started/
 
+scalar Upload
+
 type User {
     id: ID!
     firstName: String!
@@ -81,9 +83,13 @@ input NewCustomConnection {
 }
 
 type Mutation {
+#   Profile
   upsertUser(input: NewUser!): User!
   createInvite: Invite!
+#   Connections
   connectByEmail(inviteId: ID!, email: String!, subscribe: Boolean!): CustomConnection!
   upsertCustomConnection(id: ID, customConnection: NewCustomConnection!): CustomConnection!
   deleteCustomConnection(id: ID!): CustomConnection!
+#   Uploads
+  uploadProfilePicture(file: Upload!): String!
 }
