@@ -44,6 +44,10 @@ type Auth0Config struct {
 	Auth0AudienceApi string
 }
 
+func NewAuth0Config(auth0Domain string, auth0ClientId string, auth0AudienceApi string) *Auth0Config {
+	return &Auth0Config{Auth0Domain: auth0Domain, Auth0ClientId: auth0ClientId, Auth0AudienceApi: auth0AudienceApi}
+}
+
 // Verify a token
 func VerifyToken(ctx context.Context, accessToken string, config *Auth0Config) (*AuthToken, error) {
 	issuerUrl, err := url.Parse(fmt.Sprintf("https://%s/", config.Auth0Domain))

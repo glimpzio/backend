@@ -1,6 +1,9 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as ecr from "aws-cdk-lib/aws-ecr";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
@@ -31,6 +34,14 @@ export class AwsStack extends cdk.Stack {
         });
 
         const secret = new secretsmanager.Secret(this, "appSecret");
+
+        // Image uploads
+        const imageBucket = new s3.Bucket(this, "appImageBucket");
+        const cf = new cloudfront.Distribution(this, "appImageDistribution", {
+            defaultBehavior: { origin: new origins.S3Origin(imageBucket) },
+        });
+
+        // **** Add the image bucket to the ECS environment
 
         // Database
         const PORT = 5432;

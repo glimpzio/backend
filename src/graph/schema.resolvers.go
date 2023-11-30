@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/glimpzio/backend/auth"
@@ -229,7 +228,14 @@ func (r *mutationResolver) DeleteCustomConnection(ctx context.Context, id string
 
 // UploadProfilePicture is the resolver for the uploadProfilePicture field.
 func (r *mutationResolver) UploadProfilePicture(ctx context.Context, file graphql.Upload) (string, error) {
-	panic(fmt.Errorf("not implemented: UploadProfilePicture - uploadProfilePicture"))
+	middleware := auth.GetMiddleware(ctx)
+	if middleware.Token == nil {
+		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
+
+		return "", ErrMissingAuthHeader
+	}
+
+	return r.ImageUploader.ResizeAndUploadFile(file.File, 400, 400, "PROFILE_PICTURE", middleware.Token.AuthId)
 }
 
 // User is the resolver for the user field.

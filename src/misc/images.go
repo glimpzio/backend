@@ -18,11 +18,10 @@ import (
 
 type ImageUploader struct {
 	bucketName string
-	prefix     string
 }
 
-func NewImageUploader(bucketName string, prefix string) *ImageUploader {
-	return &ImageUploader{bucketName: bucketName, prefix: prefix}
+func NewImageUploader(bucketName string) *ImageUploader {
+	return &ImageUploader{bucketName: bucketName}
 }
 
 // Decode an image
@@ -88,7 +87,7 @@ func uploadImageS3(prefix string, key string, bucketName string, img *image.Imag
 }
 
 // Upload a file
-func (i *ImageUploader) ResizeAndUploadFile(reader io.Reader, width uint, height uint, key string) (string, error) {
+func (i *ImageUploader) ResizeAndUploadFile(reader io.Reader, width uint, height uint, prefix string, key string) (string, error) {
 	img, err := decodeImage(reader)
 	if err != nil {
 		return "", err
@@ -96,5 +95,5 @@ func (i *ImageUploader) ResizeAndUploadFile(reader io.Reader, width uint, height
 
 	edited := resizeAndCropImage(img, width, height)
 
-	return uploadImageS3(i.prefix, key, i.bucketName, &edited)
+	return uploadImageS3(prefix, key, i.bucketName, &edited)
 }

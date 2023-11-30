@@ -73,13 +73,9 @@ func main() {
 	}
 	defer db.Close()
 
-	auth0Config := &auth.Auth0Config{
-		Auth0Domain:      env.Auth0Domain,
-		Auth0ClientId:    env.Auth0ClientId,
-		Auth0AudienceApi: env.Auth0AudienceApi,
-	}
-
+	auth0Config := auth.NewAuth0Config(env.Auth0Domain, env.Auth0ClientId, env.Auth0AudienceApi)
 	mailList := misc.NewMailList(env.SendgridApiKey, env.SendgridSenderName, env.SendgridSenderEmail, env.SendgridListIdAccount, env.SendgridListIdMarketing)
+	imageUploader := misc.NewImageUploader(os.Getenv("IMAGE_BUCKET_NAME"))
 
 	profileService := profile.NewProfileService(db, db, mailList)
 	connectionService := connections.NewConnectionService(db, db, mailList, profileService, env.LandingBaseUrl)
@@ -94,7 +90,13 @@ func main() {
 		AllowCredentials: true,
 	}))
 	r.Use(misc.GinContextToContextMiddleware())
-	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{Logger: logger, ProfileService: profileService, ConnectionService: connectionService, Auth0Config: auth0Config}))
+	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{
+		Logger:            logger,
+		ProfileService:    profileService,
+		ConnectionService: connectionService,
+		Auth0Config:       auth0Config,
+		ImageUploader:     imageUploader,
+	}))
 	r.GET("/", playgroundHandler())
 
 	logger.InfoLog.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
