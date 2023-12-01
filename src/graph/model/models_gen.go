@@ -63,6 +63,11 @@ type PublicProfile struct {
 	Profile        *Profile `json:"profile"`
 }
 
+type UploadLink struct {
+	UploadURL string `json:"uploadUrl"`
+	PublicURL string `json:"publicUrl"`
+}
+
 type User struct {
 	ID             string   `json:"id"`
 	FirstName      string   `json:"firstName"`

@@ -7,11 +7,11 @@ package graph
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/glimpzio/backend/auth"
 	"github.com/glimpzio/backend/connections"
 	"github.com/glimpzio/backend/graph/model"
 	"github.com/glimpzio/backend/profile"
+	"github.com/google/uuid"
 )
 
 // UpsertUser is the resolver for the upsertUser field.
@@ -226,27 +226,30 @@ func (r *mutationResolver) DeleteCustomConnection(ctx context.Context, id string
 	}, nil
 }
 
-// UploadProfilePicture is the resolver for the uploadProfilePicture field.
-func (r *mutationResolver) UploadProfilePicture(ctx context.Context, file graphql.Upload) (string, error) {
+// Upload is the resolver for the upload field.
+func (r *mutationResolver) Upload(ctx context.Context) (*model.UploadLink, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
 		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
 
-		return "", ErrMissingAuthHeader
+		return nil, ErrMissingAuthHeader
 	}
 
-	r.Logger.InfoLog.Println("received file from user")
+	key := uuid.New().String()
 
-	path, err := r.ImageUploader.ResizeAndUploadFile(file.File, 400, 400, "PROFILE_PICTURE", middleware.Token.AuthId)
+	uploadUrl, publicUrl, err := r.ImageUploader.GetUploadLink(key)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 
-		return "", ErrOperationFailed
+		return nil, ErrOperationFailed
 	}
 
-	r.Logger.InfoLog.Println("uploaded image")
+	r.Logger.InfoLog.Printf("created upload link for file %s", key)
 
-	return path, nil
+	return &model.UploadLink{
+		UploadURL: uploadUrl,
+		PublicURL: publicUrl,
+	}, nil
 }
 
 // User is the resolver for the user field.

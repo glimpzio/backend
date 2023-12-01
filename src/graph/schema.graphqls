@@ -82,6 +82,11 @@ input NewCustomConnection {
     linkedin: String
 }
 
+type UploadLink {
+    uploadUrl: String!
+    publicUrl: String!
+}
+
 type Mutation {
 #   Profile
   upsertUser(input: NewUser!): User!
@@ -90,6 +95,6 @@ type Mutation {
   connectByEmail(inviteId: ID!, email: String!, subscribe: Boolean!): CustomConnection!
   upsertCustomConnection(id: ID, customConnection: NewCustomConnection!): CustomConnection!
   deleteCustomConnection(id: ID!): CustomConnection!
-#   Uploads
-  uploadProfilePicture(file: Upload!): String!
+#   Misc
+  upload: UploadLink!
 }

@@ -68,6 +68,7 @@ export class AwsStack extends cdk.Stack {
 
         secret.grantRead(taskDefinition.taskRole);
         dbCluster.secret!.grantRead(taskDefinition.taskRole);
+        imageBucket.grantPut(taskDefinition.taskRole);
 
         taskDefinition.addContainer("appContainer", {
             image: ecs.ContainerImage.fromEcrRepository(ecrRepo, "latest"),
