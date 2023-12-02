@@ -22,6 +22,12 @@ type Invite struct {
 	PublicProfile *PublicProfile `json:"publicProfile"`
 }
 
+type NewConnection struct {
+	Email     string  `json:"email"`
+	FirstName *string `json:"firstName,omitempty"`
+	LastName  *string `json:"lastName,omitempty"`
+}
+
 type NewCustomConnection struct {
 	FirstName *string `json:"firstName,omitempty"`
 	LastName  *string `json:"lastName,omitempty"`

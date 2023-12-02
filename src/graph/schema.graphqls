@@ -88,10 +88,16 @@ input NewCustomConnection {
     linkedin: String
 }
 
+input NewConnection {
+    email: String!
+    firstName: String
+    lastName: String
+}
+
 type Mutation {
   upsertUser(input: NewUser!): User!
   createInvite: Invite!
-  connectByEmail(inviteId: ID!, email: String!, subscribe: Boolean!): CustomConnection!
+  connect(inviteId: ID!, connection: NewConnection!, subscribe: Boolean!): CustomConnection!
   upsertCustomConnection(id: ID, customConnection: NewCustomConnection!): CustomConnection!
   deleteCustomConnection(id: ID!): CustomConnection!
 }

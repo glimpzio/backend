@@ -106,9 +106,9 @@ func (r *mutationResolver) CreateInvite(ctx context.Context) (*model.Invite, err
 	}, nil
 }
 
-// ConnectByEmail is the resolver for the connectByEmail field.
-func (r *mutationResolver) ConnectByEmail(ctx context.Context, inviteID string, email string, subscribe bool) (*model.CustomConnection, error) {
-	rawConnection, err := r.ConnectionService.ConnectByEmail(inviteID, email, subscribe)
+// Connect is the resolver for the connect field.
+func (r *mutationResolver) Connect(ctx context.Context, inviteID string, connection model.NewConnection, subscribe bool) (*model.CustomConnection, error) {
+	rawConnection, err := r.ConnectionService.Connect(inviteID, subscribe, connection.Email, connection.FirstName, connection.LastName)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 

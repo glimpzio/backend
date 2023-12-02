@@ -68,7 +68,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ConnectByEmail         func(childComplexity int, inviteID string, email string, subscribe bool) int
+		Connect                func(childComplexity int, inviteID string, connection model.NewConnection, subscribe bool) int
 		CreateInvite           func(childComplexity int) int
 		DeleteCustomConnection func(childComplexity int, id string) int
 		UpsertCustomConnection func(childComplexity int, id *string, customConnection model.NewCustomConnection) int
@@ -117,7 +117,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	UpsertUser(ctx context.Context, input model.NewUser) (*model.User, error)
 	CreateInvite(ctx context.Context) (*model.Invite, error)
-	ConnectByEmail(ctx context.Context, inviteID string, email string, subscribe bool) (*model.CustomConnection, error)
+	Connect(ctx context.Context, inviteID string, connection model.NewConnection, subscribe bool) (*model.CustomConnection, error)
 	UpsertCustomConnection(ctx context.Context, id *string, customConnection model.NewCustomConnection) (*model.CustomConnection, error)
 	DeleteCustomConnection(ctx context.Context, id string) (*model.CustomConnection, error)
 }
@@ -246,17 +246,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Invite.UserID(childComplexity), true
 
-	case "Mutation.connectByEmail":
-		if e.complexity.Mutation.ConnectByEmail == nil {
+	case "Mutation.connect":
+		if e.complexity.Mutation.Connect == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_connectByEmail_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_connect_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ConnectByEmail(childComplexity, args["inviteId"].(string), args["email"].(string), args["subscribe"].(bool)), true
+		return e.complexity.Mutation.Connect(childComplexity, args["inviteId"].(string), args["connection"].(model.NewConnection), args["subscribe"].(bool)), true
 
 	case "Mutation.createInvite":
 		if e.complexity.Mutation.CreateInvite == nil {
@@ -480,6 +480,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputNewConnection,
 		ec.unmarshalInputNewCustomConnection,
 		ec.unmarshalInputNewProfile,
 		ec.unmarshalInputNewUser,
@@ -599,7 +600,7 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_connectByEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_connect_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -611,15 +612,15 @@ func (ec *executionContext) field_Mutation_connectByEmail_args(ctx context.Conte
 		}
 	}
 	args["inviteId"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["email"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg1 model.NewConnection
+	if tmp, ok := rawArgs["connection"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("connection"))
+		arg1, err = ec.unmarshalNNewConnection2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐNewConnection(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["email"] = arg1
+	args["connection"] = arg1
 	var arg2 bool
 	if tmp, ok := rawArgs["subscribe"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subscribe"))
@@ -1501,8 +1502,8 @@ func (ec *executionContext) fieldContext_Mutation_createInvite(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_connectByEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_connectByEmail(ctx, field)
+func (ec *executionContext) _Mutation_connect(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_connect(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1515,7 +1516,7 @@ func (ec *executionContext) _Mutation_connectByEmail(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ConnectByEmail(rctx, fc.Args["inviteId"].(string), fc.Args["email"].(string), fc.Args["subscribe"].(bool))
+		return ec.resolvers.Mutation().Connect(rctx, fc.Args["inviteId"].(string), fc.Args["connection"].(model.NewConnection), fc.Args["subscribe"].(bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1532,7 +1533,7 @@ func (ec *executionContext) _Mutation_connectByEmail(ctx context.Context, field 
 	return ec.marshalNCustomConnection2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐCustomConnection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_connectByEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_connect(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -1571,7 +1572,7 @@ func (ec *executionContext) fieldContext_Mutation_connectByEmail(ctx context.Con
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_connectByEmail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_connect_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4746,6 +4747,53 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputNewConnection(ctx context.Context, obj interface{}) (model.NewConnection, error) {
+	var it model.NewConnection
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"email", "firstName", "lastName"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "firstName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FirstName = data
+		case "lastName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.LastName = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewCustomConnection(ctx context.Context, obj interface{}) (model.NewCustomConnection, error) {
 	var it model.NewCustomConnection
 	asMap := map[string]interface{}{}
@@ -5117,9 +5165,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "connectByEmail":
+		case "connect":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_connectByEmail(ctx, field)
+				return ec._Mutation_connect(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -5970,6 +6018,11 @@ func (ec *executionContext) marshalNInvite2ᚖgithubᚗcomᚋglimpzioᚋbackend�
 		return graphql.Null
 	}
 	return ec._Invite(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNNewConnection2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐNewConnection(ctx context.Context, v interface{}) (model.NewConnection, error) {
+	res, err := ec.unmarshalInputNewConnection(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNNewCustomConnection2githubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐNewCustomConnection(ctx context.Context, v interface{}) (model.NewCustomConnection, error) {

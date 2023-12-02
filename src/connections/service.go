@@ -22,25 +22,33 @@ func NewConnectionService(readDb *sql.DB, writeDb *sql.DB, mailList *misc.MailLi
 }
 
 // Connect the users by email signup
-func (c *ConnectionService) ConnectByEmail(inviteId string, email string, subscribe bool) (*CustomConnection, error) {
+func (c *ConnectionService) Connect(inviteId string, subscribe bool, email string, firstName *string, lastName *string) (*CustomConnection, error) {
 	_, user, err := c.profileService.GetInvite(inviteId)
 	if err != nil {
 		return nil, err
 	}
 
-	rawConnection, err := c.model.CreateCustomConnection(user.Id, nil, nil, nil, &email, nil, nil, nil)
+	rawConnection, err := c.model.CreateCustomConnection(user.Id, firstName, lastName, nil, &email, nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	if subscribe {
-		err = c.mailList.AddMarketing(email, nil, nil)
+		err = c.mailList.AddMarketing(email, firstName, lastName)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	body := fmt.Sprintf("Hey, hope you're well!\n\nAs you requested, here's the Glimpz profile for %s %s:\n\n- Bio: %s", user.FirstName, user.LastName, user.Bio)
+	body := ""
+
+	if firstName != nil {
+		body += fmt.Sprintf("Hey %s, hope you're well!", *firstName)
+	} else {
+		body += "Hey, hope you're well!"
+	}
+
+	body += fmt.Sprintf("\n\nAs you requested, here's the Glimpz profile for %s %s:\n\n- Bio: %s", user.FirstName, user.LastName, user.Bio)
 
 	if user.Profile.Email != nil {
 		body += fmt.Sprintf("\n- Email: %s", *user.Profile.Email)
@@ -62,7 +70,15 @@ func (c *ConnectionService) ConnectByEmail(inviteId string, email string, subscr
 
 	subject := fmt.Sprintf("Here's %s %s's Profile As You Requested!", user.FirstName, user.LastName)
 
-	err = c.mailList.SendMail(email, email, subject, body)
+	var name string
+
+	if firstName != nil {
+		name = *firstName
+	} else {
+		name = email
+	}
+
+	err = c.mailList.SendMail(name, email, subject, body)
 	if err != nil {
 		return nil, err
 	}
