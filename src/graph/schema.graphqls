@@ -49,7 +49,13 @@ type CustomConnection {
     linkedin: String
 }
 
+type UploadLink {
+    uploadUrl: String!
+    publicUrl: String!
+}
+
 type Query {
+    upload: UploadLink!
     user: User!
     invite(id: ID!): Invite!
     customConnection(id: ID!): CustomConnection!
@@ -82,19 +88,10 @@ input NewCustomConnection {
     linkedin: String
 }
 
-type UploadLink {
-    uploadUrl: String!
-    publicUrl: String!
-}
-
 type Mutation {
-#   Profile
   upsertUser(input: NewUser!): User!
   createInvite: Invite!
-#   Connections
   connectByEmail(inviteId: ID!, email: String!, subscribe: Boolean!): CustomConnection!
   upsertCustomConnection(id: ID, customConnection: NewCustomConnection!): CustomConnection!
   deleteCustomConnection(id: ID!): CustomConnection!
-#   Misc
-  upload: UploadLink!
 }

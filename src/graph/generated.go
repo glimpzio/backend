@@ -71,7 +71,6 @@ type ComplexityRoot struct {
 		ConnectByEmail         func(childComplexity int, inviteID string, email string, subscribe bool) int
 		CreateInvite           func(childComplexity int) int
 		DeleteCustomConnection func(childComplexity int, id string) int
-		Upload                 func(childComplexity int) int
 		UpsertCustomConnection func(childComplexity int, id *string, customConnection model.NewCustomConnection) int
 		UpsertUser             func(childComplexity int, input model.NewUser) int
 	}
@@ -95,6 +94,7 @@ type ComplexityRoot struct {
 		CustomConnection  func(childComplexity int, id string) int
 		CustomConnections func(childComplexity int) int
 		Invite            func(childComplexity int, id string) int
+		Upload            func(childComplexity int) int
 		User              func(childComplexity int) int
 	}
 
@@ -120,9 +120,9 @@ type MutationResolver interface {
 	ConnectByEmail(ctx context.Context, inviteID string, email string, subscribe bool) (*model.CustomConnection, error)
 	UpsertCustomConnection(ctx context.Context, id *string, customConnection model.NewCustomConnection) (*model.CustomConnection, error)
 	DeleteCustomConnection(ctx context.Context, id string) (*model.CustomConnection, error)
-	Upload(ctx context.Context) (*model.UploadLink, error)
 }
 type QueryResolver interface {
+	Upload(ctx context.Context) (*model.UploadLink, error)
 	User(ctx context.Context) (*model.User, error)
 	Invite(ctx context.Context, id string) (*model.Invite, error)
 	CustomConnection(ctx context.Context, id string) (*model.CustomConnection, error)
@@ -277,13 +277,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteCustomConnection(childComplexity, args["id"].(string)), true
 
-	case "Mutation.upload":
-		if e.complexity.Mutation.Upload == nil {
-			break
-		}
-
-		return e.complexity.Mutation.Upload(childComplexity), true
-
 	case "Mutation.upsertCustomConnection":
 		if e.complexity.Mutation.UpsertCustomConnection == nil {
 			break
@@ -401,6 +394,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Invite(childComplexity, args["id"].(string)), true
+
+	case "Query.upload":
+		if e.complexity.Query.Upload == nil {
+			break
+		}
+
+		return e.complexity.Query.Upload(childComplexity), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -1732,56 +1732,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteCustomConnection(ctx con
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_upload(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_upload(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Upload(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.UploadLink)
-	fc.Result = res
-	return ec.marshalNUploadLink2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐUploadLink(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_upload(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "uploadUrl":
-				return ec.fieldContext_UploadLink_uploadUrl(ctx, field)
-			case "publicUrl":
-				return ec.fieldContext_UploadLink_publicUrl(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type UploadLink", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Profile_email(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Profile_email(ctx, field)
 	if err != nil {
@@ -2168,6 +2118,56 @@ func (ec *executionContext) fieldContext_PublicProfile_profile(ctx context.Conte
 				return ec.fieldContext_Profile_linkedin(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_upload(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_upload(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Upload(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UploadLink)
+	fc.Result = res
+	return ec.marshalNUploadLink2ᚖgithubᚗcomᚋglimpzioᚋbackendᚋgraphᚋmodelᚐUploadLink(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_upload(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "uploadUrl":
+				return ec.fieldContext_UploadLink_uploadUrl(ctx, field)
+			case "publicUrl":
+				return ec.fieldContext_UploadLink_publicUrl(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UploadLink", field.Name)
 		},
 	}
 	return fc, nil
@@ -5138,13 +5138,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "upload":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_upload(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5285,6 +5278,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "upload":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_upload(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "user":
 			field := field
 

@@ -227,7 +227,7 @@ func (r *mutationResolver) DeleteCustomConnection(ctx context.Context, id string
 }
 
 // Upload is the resolver for the upload field.
-func (r *mutationResolver) Upload(ctx context.Context) (*model.UploadLink, error) {
+func (r *queryResolver) Upload(ctx context.Context) (*model.UploadLink, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
 		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
