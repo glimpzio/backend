@@ -36,7 +36,9 @@ export class AwsStack extends cdk.Stack {
         const secret = new secretsmanager.Secret(this, "appSecret");
 
         // Image uploads
-        const imageBucket = new s3.Bucket(this, "appImageBucket");
+        const imageBucket = new s3.Bucket(this, "appImageBucket", {
+            cors: [{ allowedMethods: [s3.HttpMethods.PUT], allowedOrigins: this.node.getContext("allowedOrigins"), allowedHeaders: ["*"] }],
+        });
         const cf = new cloudfront.Distribution(this, "appImageDistribution", {
             defaultBehavior: { origin: new origins.S3Origin(imageBucket) },
         });

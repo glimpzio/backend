@@ -30,6 +30,7 @@
         "hostedZoneName": "glimpz.io",
         "hostedZoneId": "Z071656330WFSFZAT5XEO",
         "lbSubdomainName": "api.glimpz.io",
-        "desiredCount": 1
+        "desiredCount": 1,
+        "allowedOrigins": ["http://localhost:3001", "https://app.glimpz.io"]
     }
 }
