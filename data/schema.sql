@@ -17,6 +17,8 @@ CREATE TABLE users (
     linkedin TEXT
 );
 
+CREATE INDEX idx_users ON users (auth_id);
+
 CREATE TABLE invites (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     -- Upon migrating to microservices remove "user_id" as a forein key
@@ -38,3 +40,5 @@ CREATE TABLE custom_connections (
     website TEXT,
     linkedin TEXT
 );
+
+CREATE INDEX idx_custom_connections ON custom_connections (user_id);
