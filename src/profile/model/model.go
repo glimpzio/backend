@@ -16,32 +16,8 @@ type Model struct {
 func (m *Model) CreateUser(authId string, firstName string, lastName string, personalEmail string, bio string, profilePicture *string, email *string, phone *string, website *string, linkedin *string) (*User, error) {
 	user := &User{}
 
-	tx, err := m.WriteDb.Begin()
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	err = tx.QueryRow("SELECT id, auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin FROM users WHERE auth_id = $1", authId).
+	err := m.WriteDb.QueryRow("INSERT INTO users (auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin", authId, firstName, lastName, personalEmail, bio, profilePicture, email, phone, website, linkedin).
 		Scan(&user.Id, &user.AuthId, &user.FirstName, &user.LastName, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
-	if err != sql.ErrNoRows {
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-
-		tx.Commit()
-
-		return user, nil
-	}
-
-	err = tx.QueryRow("INSERT INTO users (auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, auth_id, first_name, last_name, personal_email, bio, profile_picture, email, phone, website, linkedin", authId, firstName, lastName, personalEmail, bio, profilePicture, email, phone, website, linkedin).
-		Scan(&user.Id, &user.AuthId, &user.FirstName, &user.LastName, &user.PersonalEmail, &user.Bio, &user.ProfilePicture, &user.Email, &user.Phone, &user.Website, &user.LinkedIn)
-	if err != nil {
-		return nil, err
-	}
-
-	err = tx.Commit()
 	if err != nil {
 		return nil, err
 	}
