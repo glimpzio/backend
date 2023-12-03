@@ -18,3 +18,13 @@ type Resolver struct {
 	Auth0Config       *auth.Auth0Config
 	ImageUploader     *misc.ImageUploader
 }
+
+func NewResolver(logger *misc.Logger, profileService *profile.ProfileService, connectionService *connections.ConnectionService, auth0Config *auth.Auth0Config, imageUploader *misc.ImageUploader) *Resolver {
+	return &Resolver{
+		Logger:            logger,
+		ProfileService:    profileService,
+		ConnectionService: connectionService,
+		Auth0Config:       auth0Config,
+		ImageUploader:     imageUploader,
+	}
+}

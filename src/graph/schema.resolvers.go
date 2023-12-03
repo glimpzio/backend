@@ -360,7 +360,7 @@ func (r *queryResolver) CustomConnection(ctx context.Context, id string) (*model
 }
 
 // CustomConnections is the resolver for the customConnections field.
-func (r *queryResolver) CustomConnections(ctx context.Context) ([]*model.CustomConnection, error) {
+func (r *queryResolver) CustomConnections(ctx context.Context, limit int, offset int) ([]*model.CustomConnection, error) {
 	middleware := auth.GetMiddleware(ctx)
 	if middleware.Token == nil {
 		r.Logger.ErrorLog.Println(ErrMissingAuthHeader)
@@ -377,7 +377,7 @@ func (r *queryResolver) CustomConnections(ctx context.Context) ([]*model.CustomC
 
 	r.Logger.InfoLog.Printf("retrieved data for user %s", user.Id)
 
-	rawConnections, err := r.ConnectionService.GetCustomConnections(user.Id)
+	rawConnections, err := r.ConnectionService.GetCustomConnections(user.Id, limit, offset)
 	if err != nil {
 		r.Logger.ErrorLog.Println(err)
 

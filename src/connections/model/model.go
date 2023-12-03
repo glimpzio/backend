@@ -68,10 +68,10 @@ func (m *Model) GetCustomConnection(id string) (*CustomConnection, error) {
 }
 
 // Get a list of custom connections for a user
-func (m *Model) GetCustomConnections(userId string) ([]*CustomConnection, error) {
+func (m *Model) GetCustomConnections(userId string, limit int, offset int) ([]*CustomConnection, error) {
 	customConnections := []*CustomConnection{}
 
-	rows, err := m.ReadDb.Query("SELECT id, user_id, connected_at, first_name, last_name, notes, email, phone, website, linkedin FROM custom_connections WHERE user_id = $1", userId)
+	rows, err := m.ReadDb.Query("SELECT id, user_id, connected_at, first_name, last_name, notes, email, phone, website, linkedin FROM custom_connections WHERE user_id = $1 LIMIT $2 OFFSET $3", userId, limit, offset)
 	if err != nil {
 		return nil, err
 	}

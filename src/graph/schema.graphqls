@@ -59,7 +59,7 @@ type Query {
     user: User!
     invite(id: ID!): Invite!
     customConnection(id: ID!): CustomConnection!
-    customConnections: [CustomConnection!]!
+    customConnections(limit: Int!, offset: Int!): [CustomConnection!]!
 }
 
 input NewProfile {

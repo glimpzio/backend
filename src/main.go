@@ -90,13 +90,7 @@ func main() {
 		AllowCredentials: true,
 	}))
 	r.Use(misc.GinContextToContextMiddleware())
-	r.POST("/query", graphqlHandler(logger, auth0Config, &graph.Resolver{
-		Logger:            logger,
-		ProfileService:    profileService,
-		ConnectionService: connectionService,
-		Auth0Config:       auth0Config,
-		ImageUploader:     imageUploader,
-	}))
+	r.POST("/query", graphqlHandler(logger, auth0Config, graph.NewResolver(logger, profileService, connectionService, auth0Config, imageUploader)))
 	r.GET("/", playgroundHandler())
 
 	logger.InfoLog.Printf("connect to http://localhost:%s/ for GraphQL playground", port)

@@ -92,7 +92,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		CustomConnection  func(childComplexity int, id string) int
-		CustomConnections func(childComplexity int) int
+		CustomConnections func(childComplexity int, limit int, offset int) int
 		Invite            func(childComplexity int, id string) int
 		Upload            func(childComplexity int) int
 		User              func(childComplexity int) int
@@ -126,7 +126,7 @@ type QueryResolver interface {
 	User(ctx context.Context) (*model.User, error)
 	Invite(ctx context.Context, id string) (*model.Invite, error)
 	CustomConnection(ctx context.Context, id string) (*model.CustomConnection, error)
-	CustomConnections(ctx context.Context) ([]*model.CustomConnection, error)
+	CustomConnections(ctx context.Context, limit int, offset int) ([]*model.CustomConnection, error)
 }
 
 type executableSchema struct {
@@ -381,7 +381,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.CustomConnections(childComplexity), true
+		args, err := ec.field_Query_customConnections_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CustomConnections(childComplexity, args["limit"].(int), args["offset"].(int)), true
 
 	case "Query.invite":
 		if e.complexity.Query.Invite == nil {
@@ -714,6 +719,30 @@ func (ec *executionContext) field_Query_customConnection_args(ctx context.Contex
 		}
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_customConnections_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["limit"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["offset"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg1
 	return args, nil
 }
 
@@ -2390,7 +2419,7 @@ func (ec *executionContext) _Query_customConnections(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CustomConnections(rctx)
+		return ec.resolvers.Query().CustomConnections(rctx, fc.Args["limit"].(int), fc.Args["offset"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2438,6 +2467,17 @@ func (ec *executionContext) fieldContext_Query_customConnections(ctx context.Con
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CustomConnection", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_customConnections_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }

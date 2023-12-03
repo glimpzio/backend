@@ -184,8 +184,8 @@ func (c *ConnectionService) GetCustomConnection(id string) (*CustomConnection, e
 }
 
 // Get a list of the users custom connections
-func (c *ConnectionService) GetCustomConnections(userId string) ([]*CustomConnection, error) {
-	rawConnections, err := c.model.GetCustomConnections(userId)
+func (c *ConnectionService) GetCustomConnections(userId string, limit int, offset int) ([]*CustomConnection, error) {
+	rawConnections, err := c.model.GetCustomConnections(userId, limit, offset)
 	if err != nil {
 		return nil, err
 	}
