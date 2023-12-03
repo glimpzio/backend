@@ -1,0 +1,39 @@
+input NewProfile {
+    email: String
+    phone: String
+    website: String
+    linkedin: String
+}
+
+input NewUser {
+    firstName: String!
+    lastName: String!
+    email: String!
+    bio: String!
+    profilePicture: String
+    profile: NewProfile!
+}
+
+input NewCustomConnection {
+    firstName: String
+    lastName: String
+    notes: String
+    email: String
+    phone: String
+    website: String
+    linkedin: String
+}
+
+input NewConnection {
+    email: String!
+    firstName: String
+    lastName: String
+}
+
+type Mutation {
+  upsertUser(input: NewUser!): User!
+  createInvite: Invite!
+  connect(inviteId: ID!, connection: NewConnection!, subscribe: Boolean!): CustomConnection!
+  upsertCustomConnection(id: ID, customConnection: NewCustomConnection!): CustomConnection!
+  deleteCustomConnection(id: ID!): CustomConnection!
+}
